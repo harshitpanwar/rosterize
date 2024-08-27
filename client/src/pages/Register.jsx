@@ -1,13 +1,39 @@
 // src/pages/Register.jsx
 import { useNavigate } from 'react-router-dom';
 import companyLogo from '../assets/rosterize.png'
+import { createCompany } from '../api/Company';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
 
 export default function Register() {
   const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
+  const mutation = useMutation({
+    mutationFn: createCompany,
+    onSuccess: (data) => {
+      navigate('/login');
+    },
+    onError: (error) => {
+      console.error('Company creation failed:', error);
+    },
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/login');
+    setError(null);
+
+    const formData = new FormData(e.target);
+    const password = formData.get('password');
+    const cnfpassword = formData.get('cnfpassword');
+
+    if (password !== cnfpassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    const data = Object.fromEntries(formData.entries());
+    mutation.mutate(data);
   };
 
   return (
@@ -18,22 +44,41 @@ export default function Register() {
           <h1 className="text-2xl font-bold">Register</h1>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <input type="text" placeholder="Name" className="input" />
-          <input type="text" placeholder="Company" className="input" />
-          <input type="email" placeholder="Email" className="input" />
-          <input type="text" placeholder="Mobile Number" className="input" />
-          <input type="password" placeholder="Password" className="input" />
-          <input type="password" placeholder="Confirm Password" className="input" />
-          <input type="text" placeholder="Role/Position" className="input" />
-          <input type="text" placeholder="UEN" className="input" />
-          <input type="number" placeholder="No. of Employees" className="input" />
-          <input type="text" placeholder="Industry" className="input" />
-          <textarea placeholder="Message" className="col-span-2 input"></textarea>
+          <input type="text" placeholder="Name" className="input" name='name' required/>
+          <input type="email" placeholder="Email" className="input" name="email" required/>
+          <input type="text" placeholder="Mobile Number" className="input" name="phone" required/>
+          <input type="password" placeholder="Password" className="input" name="password" required/>
+          <input type="password" placeholder="Confirm Password" className="input" name="cnfpassword" required/>
+          <input type="text" placeholder="UEN" className="input" name="UEN" required/>
+          <select
+            id="employees"
+            className="input"
+            value
+            name="employeeCount"
+            required
+          >
+            <option value="1-10">1-10</option>
+            <option value="11-50">11-50</option>
+            <option value="51-200">51-200</option>
+            <option value="201-500">201-500</option>
+            <option value="501-1000">501-1000</option>
+            <option value="1001-5000">1001-5000</option>
+            <option value="5001-10000">5001-10000</option>
+            <option value="10001+">10001+</option>
+          </select>
+
+          <input type="text" placeholder="Industry" className="input" name="industry" required/>
+          <input type="text" placeholder="Website" className="col-span-2 input" name="website" required/>
+          <textarea placeholder="Address" className="col-span-2 input" name="address" required></textarea>
+          <textarea placeholder="Message" className="col-span-2 input" name="message" required></textarea>
         </div>
         <div className="flex justify-between mt-6">
           <button type="button" className="btn bg-gray-700 text-white" onClick={() => navigate(-1)}>Back</button>
-          <button type="submit" className="btn bg-blue-600 text-white">Submit</button>
+          <button type="submit" className="btn bg-blue-600 text-white" disabled={mutation.isPending}>{
+            mutation.isPending ? 'Creating Company...' : 'Create Company'
+            }</button>
         </div>
+        {(mutation.isError || error) && <p className="text-red-500 text-sm mt-2">{mutation?.error?.message || error}</p>}
       </form>
     </div>
   );

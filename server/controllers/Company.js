@@ -4,29 +4,31 @@ const bcrypt = require('bcrypt');
 
 module.exports = {
     getCompany: async(req, res) => {
-
-        const company_id = req.params.company_id;
-
-        const company = await Company.findById(company_id);
-
-        if (!company) {
-            res.status(404).send('Company not found')
-        } else {
-            res.send(company);
+        try {
+            const company_id = req.params.company_id;
+            const company = await Company.findById(company_id);
+    
+            if (!company) {
+                res.status(404).send('Company not found')
+            } else {
+                res.send(company);
+            }
+    
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error fetching company');
         }
     },
     postCompany: async(req, res) => {
 
         try {
-            const { name, address, email, phone, password, UEN, employeeCount, industry, message } = req.body;
+            const { name, address, email, phone, password, UEN, employeeCount, industry, website, message } = req.body;
 
-            if(!name || !address || !email || !phone || !password || !UEN || !employeeCount || !industry || !message) {
+            if(!name || !address || !email || !phone || !password || !UEN || !employeeCount || !industry || !website || !message) {
                 res.status(400).send('Please provide all required fields');
             }
     
             const hashedPassword = await bcrypt.hash(password, 10);
     
-            // create user and company in a single transaction    
             const user = new User({
                 email,
                 password: hashedPassword,
@@ -49,6 +51,8 @@ module.exports = {
             });
 
             const savedCompany = await company.save();
+
+            await User.findByIdAndUpdate(savedUser._id, { company: savedCompany._id });
 
             res.send(savedCompany);
     

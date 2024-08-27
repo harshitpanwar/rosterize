@@ -14,7 +14,7 @@ module.exports = {
                 return res.status(400).send({ error: 'Invalid password' });
             }
             userExists.password = undefined;
-            const token = jwt.sign({ id: userExists.id }, process.env.TOKEN_SECRET, {
+            const token = jwt.sign({ id: userExists._id, company: userExists.company, department: userExists.department }, process.env.TOKEN_SECRET, {
                 expiresIn: 86400
             });
             res.send({ user: userExists, token });

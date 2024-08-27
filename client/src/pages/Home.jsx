@@ -5,9 +5,96 @@ import Department from './Department'; // Example additional page
 import Dashboard from './Dashboard';
 import RoleManagement from './Roles';
 import Billing from './Billing';
+import { useAuth } from '../context/AuthContext';
+import UserManagement from './UserManagement';
+import SubmitReview from './SubmitReview';
+
+const roleToRoute = {
+  superadmin: [
+    {
+      'path': '/profile',
+      'component': <CompanyProfile />,
+      'name': 'Company Profile'
+    },
+    {
+      'path': '/department',
+      'component': <Department />,
+      'name': 'Department'
+    },
+    {
+      'path': '/roles',
+      'component': <RoleManagement />,
+      'name': 'Role Management'
+    },
+    {
+      'path': '/billing',
+      'component': <Billing />,
+      'name': 'Billing'
+    }
+  ],
+  companyadmin: [
+    {
+      'path': '/',
+      'component': <Dashboard />,
+      'name': 'Dashboard'
+    },
+    {
+      'path': '/profile',
+      'component': <CompanyProfile />,
+      'name': 'Company Profile'
+    },
+    {
+      'path': '/department',
+      'component': <Department />,
+      'name': 'Department'
+    },
+    {
+      'path': '/roles',
+      'component': <RoleManagement />,
+      'name': 'Role Management'
+    },
+    {
+      'path': '/billing',
+      'component': <Billing />,
+      'name': 'Billing'
+    },
+    {
+      'path': '/users',
+      'component': <UserManagement />,
+      'name': 'User Management'
+    },
+    {
+      'path': '/review',
+      'component': <SubmitReview />,
+      'name': 'Submit Review'
+    }
+
+  ],
+  departmenthead: [
+    {
+      'path': '/profile',
+      'component': <CompanyProfile />,
+      'name': 'Company Profile'
+    },
+    {
+      'path': '/department',
+      'component': <Department />,
+      'name': 'Department'
+    }
+  ],
+  user: [
+    {
+      'path': '/profile',
+      'component': <CompanyProfile />,
+      'name': 'Company Profile'
+    }
+  ]
+}
 
 const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { authData, setAuth } = useAuth();
+  console.log('authData', authData);
 
   return (
     <div className="flex h-screen">
@@ -40,6 +127,18 @@ const Home = () => {
       </div>
 
           <ul>
+            {
+              roleToRoute[authData?.role].map((route, index) => {
+                return (
+                  <li key={index} className="mb-4">
+                    <Link to={route.path} className="flex items-center space-x-2 text-white">
+                      <span>{route.name}</span>
+                    </Link>
+                  </li>
+                )
+              })
+            }
+{/* 
             <li className="mb-4">
               <Link to="/" className="flex items-center space-x-2 text-white">
                 <span>Home</span>
@@ -64,14 +163,14 @@ const Home = () => {
               <Link to="/billing" className="flex items-center space-x-2 text-white">
                 <span>Billing</span>
               </Link>
-            </li>
+            </li> */}
 
           </ul>
         </nav>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-10 overflow-auto">
         <Routes>
           <Route path="/" element={<Dashboard/>} />
           <Route path='/home' element={<Dashboard />} />
@@ -79,6 +178,8 @@ const Home = () => {
           <Route path="/department" element={<Department />} />
           <Route path="/roles" element={<RoleManagement />} />
           <Route path="/billing" element={<Billing/>} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path='/review' element={<SubmitReview />} />
           {/* Add more routes here */}
         </Routes>
       </main>

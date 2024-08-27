@@ -28,6 +28,9 @@ const companySchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide an industry for this company.'],
         },
+    website: {
+        type: String,
+        },
     message: {
         type: String,
         required: [true, 'Please provide a message for this company.'],

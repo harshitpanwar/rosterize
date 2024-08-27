@@ -15,7 +15,8 @@ function App() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['me'],
-    queryFn: me,
+    queryFn: () => me(),
+    // staleTime: Infinity,
     cacheTime: 0,
     retry: 0,
   });

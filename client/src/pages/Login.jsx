@@ -9,11 +9,10 @@ export default function Login() {
   const navigate = useNavigate();
 
   const { setAuth } = useAuth();
-
+  
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      console.log('Login successful:', data, data.user);
       if(data && data.user){
         localStorage.setItem('token', data.token);
         setAuth(data);

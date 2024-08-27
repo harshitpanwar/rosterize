@@ -1,6 +1,22 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getCompany } from '../api/Company';
+import { useAuth } from '../context/AuthContext';
+import Loader from '../Components/Loader/Loader';
 
 const CompanyProfile = () => {
+
+  const {authData} = useAuth();
+  console.log('authData:', authData);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['companyData'],
+    queryFn: () => getCompany(authData.company),
+    cacheTime: 0,
+    retry: 0,
+  });
+
+  if (isLoading) return <Loader />;
+
   return (
     <div className="p-8 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-6">Company Profile</h2>
@@ -11,6 +27,7 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={data?.name || ''}
             />
           </div>
           <div>
@@ -18,6 +35,7 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={data?.UEN || ''}
             />
           </div>
         </div>
@@ -25,18 +43,18 @@ const CompanyProfile = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Industry:</label>
-            <select
+            <input
+              type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option>Select Industry</option>
-              {/* Add more options here */}
-            </select>
+              value={data?.industry || ''}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Company Address:</label>
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={data?.address || ''}
             />
           </div>
         </div>
@@ -49,6 +67,7 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={data?.phone || ''}
             />
           </div>
           <div>
@@ -56,6 +75,7 @@ const CompanyProfile = () => {
             <input
               type="email"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={data?.email || ''}
             />
           </div>
         </div>
@@ -66,6 +86,7 @@ const CompanyProfile = () => {
             <input
               type="url"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={data?.website || ''}
             />
           </div>
         </div>
