@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const setAuth = (data) => {
-    setAuthData(data.user);
+    setAuthData(data?.user);
     setLoading(false);
   
   }

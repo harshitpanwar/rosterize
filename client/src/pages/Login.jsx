@@ -17,7 +17,7 @@ export default function Login() {
         localStorage.setItem('token', data.token);
         setAuth(data);
       }
-      navigate('/home');
+      navigate('/');
     },
     onError: (error) => {
       console.error('Login failed:', error);
@@ -56,7 +56,7 @@ export default function Login() {
             required
           />
         </div>
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-center mt-6">
           <button
             type="submit"
             className="btn bg-blue-600 text-white"

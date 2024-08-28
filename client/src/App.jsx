@@ -27,6 +27,9 @@ function App() {
     setAuth(data);
     setLoading(false);
   }
+  if(error){
+    setLoading(false);
+  }
 
   if (isLoading) return <Loader/>;
 

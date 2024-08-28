@@ -11,7 +11,7 @@ const ProtectedRoute = ({
 
   if(loading) return <Loader/>
 
-  if (!authData?.email) {
+  if (!authData || !authData?.email) {
     return <Navigate to='/login' replace />;
   }
 
