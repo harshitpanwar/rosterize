@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
             enum: [ 'superadmin', 'companyadmin', 'departmenthead', 'user'],
             required: [true, 'Please provide a role for this user.'],
             },
+        companyRole: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Role'
+        },
         company: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Company',

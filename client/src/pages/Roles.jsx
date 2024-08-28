@@ -1,30 +1,51 @@
 import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createRole, listRoles, removeRole } from '../api/Role';
+import { useAuth } from '../context/AuthContext';
+import Loader from '../Components/Loader/Loader';
 
 const RoleManagement = () => {
-    const [roles, setRoles] = useState([
-        'HR Manager',
-        'Recruiter',
-        'HRBP',
-        'Payroll Specialist',
-        'Chief Financial Officer',
-        'Accountant',
-        'Finance Executive',
-        'Sales Manager',
-        'Account Executive',
-    ]);
 
     const [newRole, setNewRole] = useState('');
+    const { authData } = useAuth();
+    const queryClient = useQueryClient();
+
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['roles'],
+        queryFn: () => listRoles(authData.company),
+        enabled: !!authData.company,
+        retry: 0,
+    });
+
+    const addRoleMutation = useMutation({
+        mutationFn: createRole,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries('roles');
+        },
+        onError: (error) => {
+            console.error('Add role failed:', error);
+        },
+    });
+
+    const deleteRoleMutation = useMutation({
+        mutationFn: removeRole,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries('roles');
+        },
+        onError: (error) => {
+            console.error('Delete role failed:', error);
+        },
+    });
 
     const addRole = () => {
-        if (newRole.trim() !== '' && !roles.includes(newRole)) {
-            setRoles([...roles, newRole]);
+        if (newRole.trim() !== '') {
+            addRoleMutation.mutate({ name: newRole, companyId: authData.company });
             setNewRole('');
         }
     };
 
-    const removeRole = (index) => {
-        const updatedRoles = roles.filter((_, i) => i !== index);
-        setRoles(updatedRoles);
+    const deleteRole = (roleId) => {
+        deleteRoleMutation.mutate(roleId);
     };
 
     return (
@@ -33,11 +54,11 @@ const RoleManagement = () => {
             <div className="mb-4">
                 <label className="block font-bold mb-2">List of Roles:</label>
                 <ul className="border rounded-md p-2 max-h-40 overflow-y-auto">
-                    {roles.map((role, index) => (
+                    {data?.map((role, index) => (
                         <li key={index} className="flex justify-between items-center mb-2">
-                            {role}
+                            {role.name}
                             <button
-                                onClick={() => removeRole(index)}
+                                onClick={() => deleteRole(role._id)}
                                 className="text-red-500 hover:text-red-700 font-bold text-sm"
                             >
                                 x

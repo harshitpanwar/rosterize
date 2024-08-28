@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import CompanyProfile from './CompanyProfile';
 import Department from './Department'; // Example additional page
-import Dashboard from './Dashboard';
+import CompanyDashboard from './Dashboard/CompanyDashboard';
+import UserDashboard from './Dashboard/UserDashboard';
+import ClockInOut from './ClockInOut';
+import Schedule from './Schedule/UserSchedule';
 import RoleManagement from './Roles';
 import Billing from './Billing';
 import { useAuth } from '../context/AuthContext';
 import UserManagement from './UserManagement';
 import SubmitReview from './SubmitReview';
+import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings } from 'lucide-react';
 
 const roleToRoute = {
   superadmin: [
@@ -35,38 +39,45 @@ const roleToRoute = {
   companyadmin: [
     {
       'path': '/',
-      'component': <Dashboard />,
-      'name': 'Dashboard'
+      'component': <CompanyDashboard />,
+      'name': 'Dashboard',
+      'icon': <HomeIcon />
     },
     {
       'path': '/profile',
       'component': <CompanyProfile />,
-      'name': 'Company Profile'
+      'name': 'Company Profile',
+      'icon': <User />
     },
     {
       'path': '/department',
       'component': <Department />,
-      'name': 'Department'
+      'name': 'Department',
+      'icon': <LogOut />
     },
     {
       'path': '/roles',
       'component': <RoleManagement />,
-      'name': 'Role Management'
+      'name': 'Role Management',
+      'icon': <Settings />
     },
     {
       'path': '/billing',
       'component': <Billing />,
-      'name': 'Billing'
+      'name': 'Billing',
+      'icon': <Receipt />
     },
     {
       'path': '/users',
       'component': <UserManagement />,
-      'name': 'User Management'
+      'name': 'User Management',
+      'icon': <ChartNoAxesGantt />
     },
     {
       'path': '/review',
       'component': <SubmitReview />,
-      'name': 'Submit Review'
+      'name': 'Submit Review',
+      'icon': <Star />
     }
 
   ],
@@ -84,9 +95,28 @@ const roleToRoute = {
   ],
   user: [
     {
+      'path': '/',
+      'component': <UserDashboard />,
+      'name': 'Dashboard',
+      'icon': <HomeIcon />
+    },
+    {
       'path': '/profile',
       'component': <CompanyProfile />,
-      'name': 'Company Profile'
+      'name': 'User Profile',
+      'icon': <User />
+    },
+    {
+      'path': '/clockinout',
+      'component': <ClockInOut />,
+      'name': 'Clock In/Out',
+      'icon': <LogOut />
+    },
+    {
+      'path': '/schedule',
+      'component': <Schedule />,
+      'name': 'Schedule',
+      'icon': <Calendar />
     }
   ]
 }
@@ -132,7 +162,7 @@ const Home = () => {
                 return (
                   <li key={index} className="mb-4">
                     <Link to={route.path} className="flex items-center space-x-2 text-white">
-                      <span>{route.name}</span>
+                      <span className='flex flex-row gap-2'>{route.icon} {route.name}</span>
                     </Link>
                   </li>
                 )
@@ -172,14 +202,21 @@ const Home = () => {
       {/* Main Content Area */}
       <main className="flex-1 p-10 overflow-auto">
         <Routes>
-          <Route path="/" element={<Dashboard/>} />
+          {/* <Route path="/" element={<Dashboard/>} />
           <Route path='/home' element={<Dashboard />} />
           <Route path="/profile" element={<CompanyProfile />} />
           <Route path="/department" element={<Department />} />
           <Route path="/roles" element={<RoleManagement />} />
           <Route path="/billing" element={<Billing/>} />
           <Route path="/users" element={<UserManagement />} />
-          <Route path='/review' element={<SubmitReview />} />
+          <Route path='/review' element={<SubmitReview />} /> */}
+          {authData?.role &&
+            roleToRoute[authData?.role].map((route, index) => {
+              return (
+                <Route key={index} path={route.path} element={route.component} />
+              )
+            })
+          }
           {/* Add more routes here */}
         </Routes>
       </main>

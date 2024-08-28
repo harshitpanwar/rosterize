@@ -8,10 +8,11 @@ import { useQuery } from '@tanstack/react-query';
 import {useAuth} from './context/AuthContext';
 import { me } from './api/Auth';
 import Loader from './Components/Loader/Loader';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
 
-  const { authData, setAuth } = useAuth();
+  const { authData, setAuth, setLoading } = useAuth();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['me'],
@@ -24,6 +25,7 @@ function App() {
   if(data){
     console.log('User:', data);
     setAuth(data);
+    setLoading(false);
   }
 
   if (isLoading) return <Loader/>;
@@ -35,7 +37,7 @@ function App() {
       }
       <Router>
         <Routes>
-          <Route path="/*" element={<Home />} />
+          <Route path="/*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>

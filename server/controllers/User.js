@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const brcypt = require('bcryptjs');
 
 module.exports = {
     getUser: async(req, res) => {
@@ -17,29 +18,58 @@ module.exports = {
         }
 
     },
-    postUser: async(req, res) => {
+    createUser: async(req, res) => {
 
-        const { name, email, password } = req.body;
+        try {
+            const { firstName, lastName, email, companyRole, department, phoneNo, role } = req.body;
+            console.log(req.body);
+            if(!firstName || !email || !companyRole || !department) {
+                return res.status(400).send('All fields are required');
+            }
 
-        const newUser = new User({
-            name,
-            email,
-            password
-        });
-
-        const savedUser = await newUser.save();
-
-        if (!savedUser) {
-            res.status(500).send('Error saving user')
+            const tempPassword = 'password';
+            const hashedPassword = brcypt.hashSync(tempPassword, 10);
+    
+            const newUser = new User({
+                firstName,
+                lastName,
+                email,
+                password: hashedPassword,
+                role,
+                companyRole,
+                department,
+                phoneNo,
+                company: req.user.company,
+                status: 'active'
+            });
+    
+            const savedUser = await newUser.save();
+    
+            if (!savedUser) {
+                res.status(500).send('Error saving user')
+            }
+            res.send(savedUser);
+    
+        } catch (error) {
+            res.status(500).send(error.message || 'Error saving user')
+            
         }
-        res.send(savedUser);
-
     },
     putUser: async(req, res) => {
         res.send('Put User')
     },
     deleteUser: async(req, res) => {
-        res.send('Delete User')
+        try {
+            const user_id = req.params.user_id;
+            const user = await User.findByIdAndDelete(user_id);
+            if (!user) {
+                res.status(404).send('User not found');
+            } else {
+                res.send(user);
+            }
+        } catch (error) {
+            res.status(500).send(error.message || 'Error deleting user');
+        }
     },
     me: async(req, res) => {
         try {
@@ -56,6 +86,19 @@ module.exports = {
         }
         catch (err) {
             return res.status(401).send({ error: 'User not found' });
+        }
+    },
+    list: async(req, res) => {
+        try {
+            const users = await User.find({ 
+                company: req.user.company, 
+                status: 'active',
+                // departmenthead and user
+                role: { $in: ['departmenthead', 'user'] }
+            }).populate('companyRole').populate('department');
+            res.send(users);
+        } catch (error) {
+            res.status(500).send('Error fetching users');
         }
     }
 
