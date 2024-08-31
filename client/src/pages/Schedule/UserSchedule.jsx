@@ -1,7 +1,23 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getClockInFromToDate } from '../../api/User';
+import Loader from '../../Components/Loader/Loader';
 
 const Schedule = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
+
+  const fromToFormat = (month) => {
+    
+  }
+  // Fetch the schedule data
+  const { loading, error, data } = useQuery({
+    queryKey: ['schedule', selectedMonth],
+    queryFn: () => getClockInFromToDate({}),
+    enabled: !!selectedMonth,
+  });
+
+  if(data) console.log(data);
+
 
   // Dummy data for the schedule
   const scheduleData = [

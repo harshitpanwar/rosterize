@@ -1,15 +1,33 @@
 // src/components/SubmitReview.jsx
 
 import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { submitReview } from '../api/User';
 
 const SubmitReview = () => {
+
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const mutation = useMutation({
+    mutationFn: submitReview,
+    onSuccess: () => {
+      setError('');
+      setMessage('Review submitted successfully.');
+    },
+    onError: (error) => {
+      setMessage('');
+      setError(error.message);
+  }
+  });
+
   const [rating, setRating] = useState('');
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ rating, title, text });
+    mutation.mutate({ title, review: text, rating });
   };
 
   const handleCancel = () => {
@@ -76,6 +94,8 @@ const SubmitReview = () => {
           </button>
         </div>
       </form>
+      {message && <p className="text-green-500 mt-4">{message}</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };

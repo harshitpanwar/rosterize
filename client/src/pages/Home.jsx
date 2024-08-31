@@ -11,7 +11,10 @@ import Billing from './Billing';
 import { useAuth } from '../context/AuthContext';
 import UserManagement from './UserManagement';
 import SubmitReview from './SubmitReview';
-import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings } from 'lucide-react';
+import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings, ChartPie, BriefcaseMedical } from 'lucide-react';
+import ApplyLeave from './ApplyLeave';
+import StatusPage from './Status';
+import UserProfile from './Profile/UserProfile';
 
 const roleToRoute = {
   superadmin: [
@@ -102,7 +105,7 @@ const roleToRoute = {
     },
     {
       'path': '/profile',
-      'component': <CompanyProfile />,
+      'component': <UserProfile />,
       'name': 'User Profile',
       'icon': <User />
     },
@@ -117,6 +120,24 @@ const roleToRoute = {
       'component': <Schedule />,
       'name': 'Schedule',
       'icon': <Calendar />
+    },
+    {
+      'path': '/leave',
+      'component': <ApplyLeave />,
+      'name': 'Apply Leave',
+      'icon': <BriefcaseMedical />
+    },
+    {
+      'path': '/status',
+      'component': <StatusPage />,
+      'name': 'Status',
+      'icon': <ChartPie />
+    },
+    {
+      'path': '/review',
+      'component': <SubmitReview />,
+      'name': 'Submit Review',
+      'icon': <Star />
     }
   ]
 }
@@ -124,7 +145,6 @@ const roleToRoute = {
 const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { authData, setAuth } = useAuth();
-  console.log('authData', authData);
 
   return (
     <div className="flex h-screen">

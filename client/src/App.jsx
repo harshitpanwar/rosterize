@@ -23,7 +23,6 @@ function App() {
   });
 
   if(data){
-    console.log('User:', data);
     setAuth(data);
     setLoading(false);
   }

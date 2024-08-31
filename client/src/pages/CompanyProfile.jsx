@@ -7,7 +7,6 @@ import Loader from '../Components/Loader/Loader';
 const CompanyProfile = () => {
 
   const {authData} = useAuth();
-  console.log('authData:', authData);
   const { data, isLoading, error } = useQuery({
     queryKey: ['companyData'],
     queryFn: () => getCompany(authData.company),

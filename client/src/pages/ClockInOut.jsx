@@ -1,17 +1,112 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
+import { clockIn, clockOut, getClockInOutStatus } from '../api/User';
+import Loader from '../Components/Loader/Loader';
+
+const utcToTimeString = (utcTimeString) => {
+    const utcDate = new Date(utcTimeString);
+
+  // Extract the local hours and minutes
+  const hours = utcDate.getHours().toString().padStart(2, '0');
+  const minutes = utcDate.getMinutes().toString().padStart(2, '0');
+
+  // Combine into "HH:mm" format
+  const originalTimeString = `${hours}:${minutes}`;
+  return originalTimeString;
+
+}
 
 const ClockInOut = () => {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('18:00');
+  const [succesMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
+  const queryClient = new QueryClient();
+
+  const {loading, error, data} = useQuery({
+    queryKey: ['clockInOutStatus'],
+    queryFn: getClockInOutStatus,
+    onSuccess: (data) => {
+      console.log(data);
+      if(data.clockIn && !data.clockOut) {
+        console.log("clockIn", data.clockIn);
+        setIsClockedIn(true);
+        setStartTime(utcToTimeString(data.clockIn));
+      }
+      else if(data.clockIn && data.clockOut) {
+        console.log("clockOut", data.clockIn);
+        setIsClockedIn(false);
+        setStartTime(utcToTimeString(data.clockIn));
+        setEndTime(utcToTimeString(data.clockOut));
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+    }
+  })
+  
+  const clockInMutation = useMutation({
+    mutationFn: clockIn,
+    onSuccess: () => {
+      setIsClockedIn(true);
+      setErrorMessage('');
+      setSuccessMessage('Clocked in successfully');
+    },
+    onError: (error) => {
+      setSuccessMessage('');
+      setErrorMessage(error.message);
+      console.error(error);
+    }
+  });
+
+  const clockOutMutation = useMutation({
+    mutationFn: clockOut,
+    onSuccess: () => {
+      setIsClockedIn(false);
+      setErrorMessage('');
+      setSuccessMessage('Clocked out successfully');
+    },
+    onError: (error) => {
+      setSuccessMessage('');
+      setErrorMessage(error.message);
+      console.error(error);
+    }
+  });
+  
   const handleClockIn = () => {
-    setIsClockedIn(true);
+    clockInMutation.mutate({time: startTime});
   };
 
   const handleClockOut = () => {
-    setIsClockedIn(false);
+
+    if(endTime < startTime) {
+      setSuccessMessage('');
+      return setErrorMessage('End time cannot be less than start time');
+    }
+    clockOutMutation.mutate({time: endTime});
   };
+
+  useEffect(() => {
+
+    queryClient.invalidateQueries('clockInOutStatus');
+    if(data) {
+      if(data.clockIn && !data.clockOut) {
+        setIsClockedIn(true);
+        setStartTime(utcToTimeString(data.clockIn));
+      }
+      else if(data.clockIn && data.clockOut) {
+        setIsClockedIn(false);
+        setStartTime(utcToTimeString(data.clockIn));
+        setEndTime(utcToTimeString(data.clockOut));
+      }
+    }
+
+  }, [data])
+
+  if(loading) return <Loader />
+  
 
   return (
     <div className="p-6 flex flex-col items-center justify-center">
@@ -47,23 +142,25 @@ const ClockInOut = () => {
         </div>
 
         <div className="mt-6">
-          {!isClockedIn ? (
+          {!isClockedIn? (
             <button
               onClick={handleClockIn}
               className="w-full bg-blue-900 text-white py-2 px-4 rounded shadow"
             >
-              Clock In
+              {clockInMutation.isPending ? 'Clocking In...' : 'Clock In'}
             </button>
           ) : (
             <button
               onClick={handleClockOut}
               className="w-full bg-blue-900 text-white py-2 px-4 rounded shadow"
             >
-              Clock Out
+              {clockOutMutation.isPending ? 'Clocking Out...' : 'Clock Out'}
             </button>
           )}
         </div>
       </div>
+      {succesMessage && <div className="mt-4 text-green-500">{succesMessage}</div>}
+      {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}
     </div>
   );
 };

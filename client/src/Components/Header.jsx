@@ -4,8 +4,7 @@ import { useAuth } from '../context/AuthContext'
 const Header = () => {
 
   const { authData, logout } = useAuth();
-
-  console.log("authData", authData);
+  console.log(authData);
   return (
     <div className="flex-1 p-1 bg-gray-800">
     <header className="flex flex-row justify-between items-center m-2">

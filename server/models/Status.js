@@ -16,6 +16,10 @@ const statusSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide a status.'],
     },
+    message: {
+        type: String,
+        required: [true, 'Please provide a message.'],
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -26,4 +30,6 @@ const statusSchema = new mongoose.Schema({
     }
 });
 
-export const Status = mongoose.model('Status', statusSchema);
+const Status = mongoose.model('Status', statusSchema);
+
+module.exports = Status;

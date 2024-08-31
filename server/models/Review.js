@@ -21,6 +21,8 @@ const reviewSchema = new mongoose.Schema({
     },
     rating: {
         type: Number,
+        enum: [1, 2, 3, 4, 5],
+        min: [1, 'Rating must be at least 1.'],
         required: [true, 'Please provide a rating.'],
     },
     status: {
@@ -38,4 +40,6 @@ const reviewSchema = new mongoose.Schema({
     }
 });
 
-export const Review = mongoose.model('Review', reviewSchema);
+const Review = mongoose.model('Review', reviewSchema);
+
+module.exports = Review;

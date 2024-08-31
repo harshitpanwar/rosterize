@@ -34,4 +34,6 @@ const leaveSchema = new monogoose.Schema({
     }
 });
 
-export const Leave = monogoose.model('Leave', leaveSchema);
+const Leave = monogoose.model('Leave', leaveSchema);
+
+module.exports = Leave;
