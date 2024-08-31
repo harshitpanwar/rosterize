@@ -32,6 +32,17 @@ export const updateUser = async (id, user) => {
     }
 }
 
+
+export const searchUser = async ({email, user}) => {
+    try {
+        const response = await axios.get(`/user/search?email=${email}`);
+        return response.data;
+    }
+    catch (error) {
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to search user');
+    }
+}
+
 export const listUsers = async () => {
     try {
         const response = await axios.get('/user/list');
@@ -135,4 +146,15 @@ export const submitReview = async ({title, review, rating}) => {
     } catch (error) {
         throw new Error(error?.response?.data?.message || error.message || 'Failed to submit review');
     }
+}
+
+export const Dashboard = async () => {
+
+    try {
+        const response = await axios.get('/user/dashboard');
+        return response.data;
+    } catch (error) {
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to get dashboard data');
+    }
+
 }

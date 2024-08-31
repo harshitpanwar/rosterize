@@ -15,7 +15,7 @@ module.exports = {
     list: async (req, res) => {
         try {
             // const roles = await Role.find();
-            console.log("params",req.params.company_id);
+            // console.log("params",req.params.company_id);
             const company_id = req.params.company_id;
             const roles = await Role.find({company: company_id});
 

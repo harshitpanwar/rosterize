@@ -11,33 +11,44 @@ import Billing from './Billing';
 import { useAuth } from '../context/AuthContext';
 import UserManagement from './UserManagement';
 import SubmitReview from './SubmitReview';
-import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings, ChartPie, BriefcaseMedical } from 'lucide-react';
+import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings, ChartPie, BriefcaseMedical, Bell } from 'lucide-react';
 import ApplyLeave from './ApplyLeave';
 import StatusPage from './Status';
 import UserProfile from './Profile/UserProfile';
+import ManageCustomers from './Admin/ManageCustomer';
+import ApproveRejectLeaves from './Department/ApproveLeaves';
+import AdminDashboard from './Admin/AdminDashboard';
+import ManageCustomerRatings from './Admin/ManageReviews';
+import ManagePrice from './Admin/ManagePrice';
+import EmployeeProfile from './Profile/EmployeeProfile'; 
 
 const roleToRoute = {
   superadmin: [
     {
-      'path': '/profile',
-      'component': <CompanyProfile />,
-      'name': 'Company Profile'
+      'path': '/',
+      'component':  <AdminDashboard/>,
+      'name': 'Dashboard',
+      'icon': <HomeIcon />
     },
     {
-      'path': '/department',
-      'component': <Department />,
-      'name': 'Department'
+      'path': '/managecustomer',
+      'component': <ManageCustomers />,
+      'name': 'Manage Customers',
+      'icon': <User/>
     },
     {
-      'path': '/roles',
-      'component': <RoleManagement />,
-      'name': 'Role Management'
+      'path': '/managereview',
+      'component': <ManageCustomerRatings />,
+      'name': 'Manage Review',
+      'icon': <Star />
     },
     {
-      'path': '/billing',
-      'component': <Billing />,
-      'name': 'Billing'
+      'path': '/manageprice',
+      'component': <ManagePrice />,
+      'name': 'Manage Price',
+      'icon': <Receipt />
     }
+
   ],
   companyadmin: [
     {
@@ -94,6 +105,18 @@ const roleToRoute = {
       'path': '/department',
       'component': <Department />,
       'name': 'Department'
+    },
+    {
+      'path': '/approveleaves',
+      'component': <ApproveRejectLeaves />,
+      'name': 'Approve/Reject Leaves',
+      'icon': <Bell/>
+    },
+    {
+      'path': '/employeeprofile',
+      'component': <EmployeeProfile />,
+      'name': 'Employee Profile',
+      'icon': <User/>
     }
   ],
   user: [
@@ -188,32 +211,6 @@ const Home = () => {
                 )
               })
             }
-{/* 
-            <li className="mb-4">
-              <Link to="/" className="flex items-center space-x-2 text-white">
-                <span>Home</span>
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link to="/profile" className="flex items-center space-x-2 text-white">
-                <span>Company Profile</span>
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link to="/department" className="flex items-center space-x-2 text-white">
-                <span>Department</span>
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link to="/roles" className="flex items-center space-x-2 text-white">
-                <span>Role(s)</span>
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link to="/billing" className="flex items-center space-x-2 text-white">
-                <span>Billing</span>
-              </Link>
-            </li> */}
 
           </ul>
         </nav>
@@ -222,14 +219,6 @@ const Home = () => {
       {/* Main Content Area */}
       <main className="flex-1 p-10 overflow-auto">
         <Routes>
-          {/* <Route path="/" element={<Dashboard/>} />
-          <Route path='/home' element={<Dashboard />} />
-          <Route path="/profile" element={<CompanyProfile />} />
-          <Route path="/department" element={<Department />} />
-          <Route path="/roles" element={<RoleManagement />} />
-          <Route path="/billing" element={<Billing/>} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path='/review' element={<SubmitReview />} /> */}
           {authData?.role &&
             roleToRoute[authData?.role].map((route, index) => {
               return (

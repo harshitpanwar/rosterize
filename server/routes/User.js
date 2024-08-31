@@ -1,6 +1,6 @@
-const {me, createUser, getUser, updateUser, list, deleteUser, clockin, clockout, 
+const {me, createUser, getUser, updateUser, searchUser, list, deleteUser, clockin, clockout, 
     getclockInOutStatus, getClockInFromToDate, setStatus, getStatus, 
-    applyLeave, getAllStatusMessages, submitReview} = require('../controllers/User');
+    applyLeave, getAllStatusMessages, submitReview, dashboard} = require('../controllers/User');
 
 const router = require('express').Router();
 
@@ -8,6 +8,7 @@ router.get('/me', me);
 router.post('/create', createUser);
 router.get('/get/:user_id', getUser);
 router.post('/update/:user_id', updateUser);
+router.get('/search', searchUser);
 router.get('/list', list);
 router.delete('/delete/:user_id', deleteUser);
 router.post('/clockin', clockin);
@@ -19,5 +20,6 @@ router.post('/setstatus', setStatus);
 router.post('/applyleave', applyLeave);
 router.get('/getallstatusmessages', getAllStatusMessages);
 router.post('/submitreview', submitReview);
+router.get('/dashboard', dashboard);
 
 module.exports = router;

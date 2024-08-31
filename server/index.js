@@ -8,6 +8,8 @@ const authRoutes = require('./routes/Auth');
 const userRoutes = require('./routes/User');
 const departmentRoutes = require('./routes/Department');
 const roleRoutes = require('./routes/Role');
+const adminRoutes = require('./routes/Admin');
+const companyAdminRoutes = require('./routes/CompanyAdmin');
 
 require('dotenv').config();
 
@@ -36,6 +38,8 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
         app.use('/api/user', checkAuth, userRoutes);
         app.use('/api/department', departmentRoutes);
         app.use('/api/role', roleRoutes);
+        app.use('/api/admin', checkAuth, adminRoutes);
+        app.use('/api/companyadmin', checkAuth, companyAdminRoutes);
 
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);

@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listDepartments } from "../api/Department";
 import { listRoles } from "../api/Role";
 
 import { useAuth } from "../context/AuthContext";
 import Loader from "../Components/Loader/Loader";
-import { listUsers, createUser, deleteUser } from "../api/User";
+import { listUsers, createUser, deleteUser, searchUser} from "../api/User";
 
 const UserManagement = () => {
 
   const { authData } = useAuth();
   const queryClient = useQueryClient();
+
+  const [users, setUsers] = useState([]);
+  const [email, setEmail] = useState("");
 
   const { data: departments, isLoading: loadingDepartments, error: errorDepartments } = useQuery({
     queryKey: ['departments'],
@@ -26,12 +29,30 @@ const UserManagement = () => {
     retry: 0,
   });
 
-  const {data: users, isLoading: loadingUsers, error: errorUsers} = useQuery({
+  const {data: usersData, isLoading: loadingUsers, error: errorUsers} = useQuery({
     queryKey: ['users'],
     queryFn: () => listUsers(authData.company),
     enabled: !!authData.company,
     retry: 0,
   });
+
+  useEffect(() => {
+
+    if(usersData) {
+      setUsers(usersData);
+    }
+
+  }, [usersData])
+
+  const searchUserMutation = useMutation({
+    mutationFn: searchUser,
+    onSuccess: (data) => {
+      setUsers(data);
+    },
+    onError: (error) => {
+      console.error('Search user failed:', error);
+    },
+  })
   
   const createUserMutation = useMutation({
     mutationFn: createUser,
@@ -83,9 +104,20 @@ const UserManagement = () => {
   };
 
   const handleDeleteUser = (userId) => {
-    // setUsers(users.filter((user) => user.email !== email));
     deleteUserMutation.mutate(userId);
   };
+
+  useEffect(() => {
+
+    // debounce search
+    const timeoutId = setTimeout(() => {
+      searchUserMutation.mutate({email, user: authData.company});
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+
+  }, [email]);
+
 
   if (loadingDepartments || loadingRoles) return <Loader />;
 
@@ -193,17 +225,20 @@ const UserManagement = () => {
         Add User
       </button>
 
-      {
-        users?.length === 0? <p className="text-center mt-4">No users found</p>:
         <div className="mt-8">
           <h3 className="text-xl font-bold mb-4">Search User</h3>
           <input
             type="text"
             placeholder="To search or delete user, key in email"
             className="border p-2 rounded w-full"
+            onChange={(e) => {e.preventDefault(); setEmail(e.target.value)}}
           />
 
           <div className="mt-4">
+            {
+              users && users.length == 0? <p>No user found</p> : null
+            }
+
             {users?.map((user) => (
               <div
                 key={user.email}
@@ -237,7 +272,7 @@ const UserManagement = () => {
             ))}
           </div>
         </div>
-      }
+      
 
     </div>
   );

@@ -1,18 +1,48 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getCompany } from '../api/Company';
+import React, { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getCompany, updateCompany } from '../api/Company';
 import { useAuth } from '../context/AuthContext';
 import Loader from '../Components/Loader/Loader';
 
 const CompanyProfile = () => {
 
+  const [message, setMessage] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [companyData, setCompanyData] = React.useState({});
+  const queryClient = useQueryClient();
   const {authData} = useAuth();
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error: queryError } = useQuery({
     queryKey: ['companyData'],
     queryFn: () => getCompany(authData.company),
     cacheTime: 0,
     retry: 0,
   });
+
+  useEffect(() => {
+    if (data) {
+      setCompanyData(data);
+    }
+  },[data]);
+
+  const updateMutation = useMutation({
+    mutationFn: (data) => updateCompany(data),
+    onSuccess: () => {
+      setError('');
+      setMessage('Company profile updated successfully');
+      queryClient.invalidateQueries('companyData');
+    },
+    onError: (error) => {
+      setMessage('');
+      setError(error.message);
+    }
+  })
+  console.log(authData)
+  const saveCompany = () => {
+    setCompanyData({...companyData, company_id: authData.company});
+    console.log("companyData", companyData);
+    updateMutation.mutate(companyData);
+  }
+
 
   if (isLoading) return <Loader />;
 
@@ -26,7 +56,8 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.name || ''}
+              value={companyData.name || ''}
+              onChange={e => setCompanyData({...companyData, name: e.target.value})}
             />
           </div>
           <div>
@@ -34,7 +65,8 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.UEN || ''}
+              value={companyData?.UEN || ''}
+              onChange={e => setCompanyData({...companyData, UEN: e.target.value})}
             />
           </div>
         </div>
@@ -45,7 +77,8 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.industry || ''}
+              value={companyData?.industry || ''}
+              onChange={e => setCompanyData({...companyData, industry: e.target.value})}
             />
           </div>
           <div>
@@ -53,7 +86,8 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.address || ''}
+              value={companyData?.address || ''}
+              onChange={e => setCompanyData({...companyData, address: e.target.value})}
             />
           </div>
         </div>
@@ -66,7 +100,8 @@ const CompanyProfile = () => {
             <input
               type="text"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.phone || ''}
+              value={companyData?.phone || ''}
+              onChange={e => setCompanyData({...companyData, phone: e.target.value})}
             />
           </div>
           <div>
@@ -74,7 +109,8 @@ const CompanyProfile = () => {
             <input
               type="email"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.email || ''}
+              value={companyData?.createdBy?.email || ''}
+              onChange={e => setCompanyData({...companyData, createdBy: {...companyData.createdBy, email: e.target.value}})}
             />
           </div>
         </div>
@@ -83,9 +119,11 @@ const CompanyProfile = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Website:</label>
             <input
-              type="url"
+              type="string"
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              value={data?.website || ''}
+              value={companyData?.website || ''}
+              onChange={(e) => setCompanyData({...companyData, website: e.target.value})}
+              required
             />
           </div>
         </div>
@@ -100,11 +138,14 @@ const CompanyProfile = () => {
           <button
             type="submit"
             className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow-sm"
+            onClick={() => saveCompany()}
           >
             Save Changes
           </button>
         </div>
       </form>
+      {message && <p className="text-green-500 mt-4">{message}</p>}
+      {(error || queryError) && <p className="text-red-500 mt-4">{error || queryError}</p>}
     </div>
   );
 };

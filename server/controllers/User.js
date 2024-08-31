@@ -4,6 +4,7 @@ const ClockInOut = require('../models/ClockInOut');
 const Status = require('../models/Status');
 const Leave = require('../models/Leave');
 const Review = require('../models/Review');
+const { companyAdmin, superAdmin } = require('../helpers/User/dashboard');
 
 module.exports = {
     getUser: async(req, res) => {
@@ -30,7 +31,7 @@ module.exports = {
 
         try {
             const { firstName, lastName, email, companyRole, department, phoneNo, role } = req.body;
-            console.log(req.body);
+            // console.log(req.body);
             if(!firstName || !email || !companyRole || !department) {
                 return res.status(400).send('All fields are required');
             }
@@ -115,6 +116,30 @@ module.exports = {
             res.status(500).send(error.message || 'Error deleting user');
         }
     },
+    searchUser: async(req, res) => {
+        try {
+
+            const {email} = req.query;
+            if (!email && email!="") {
+                return res.status(400).send('Email is required');
+            }
+
+            const users = await User.find({ 
+                email: { $regex: `^${email}`, $options: 'i' }, 
+                company: req.user.company,
+                role: 'user',
+                role: { $in: ['departmenthead', 'user'] } 
+            });
+
+            if (!users) {
+                return res.status(404).send('User not found');
+            }
+            res.send(users);
+            
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error searching for user');
+        }
+    },
     me: async(req, res) => {
         try {
             const user = await User.findById(req.user.id);
@@ -134,6 +159,7 @@ module.exports = {
     },
     list: async(req, res) => {
         try {
+            // console.log("fjdaskf", req.user);
             const users = await User.find({ 
                 company: req.user.company, 
                 status: 'active',
@@ -151,7 +177,7 @@ module.exports = {
             const {clockInTime} = req.body;
             const user = await User.findById(req.user.id);
 
-            console.log(clockInTime, user);
+            // console.log(clockInTime, user);
             if (!user) {
                 return res.status(404).send('User not found');
             }
@@ -404,5 +430,45 @@ module.exports = {
             return res.status(500).send(error.message || 'Error submitting review');
         }
     },
+    dashboard: async(req, res) => {
+        try {
+            
+            const user_id = req.user._id;
+
+            const company_id = req.user.company;
+            const user = await User.findOne({ _id: user_id }).populate('companyRole').populate('department');
+            if (!user) {
+                return res.status(404).send('User not found');
+            }
+            let data;
+
+            switch (user.role) {
+
+                case 'superadmin':
+                    data = await superAdmin();
+                    return res.send(data);   
+
+                case 'companyadmin':
+
+                    data = await companyAdmin(user_id, company_id);
+                    return res.send(data);
+                
+                case 'departmenthead':
+                    return res.send('Department Head Dashboard');
+
+                case 'user':
+                    return res.send('User Dashboard');
+
+                default:
+                    return res.status(403).send('Unauthorized');
+
+            }
+
+
+
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error fetching dashboard');
+        }
+    }
 
 }

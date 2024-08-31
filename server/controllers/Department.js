@@ -14,7 +14,7 @@ module.exports = {
     list: async (req, res) => {
         try {
             // const departments = await Department.find();
-            console.log("params",req.params.company_id);
+            // console.log("params",req.params.company_id);
             const company_id = req.params.company_id;
             const departments = await Department.find({company: company_id});
 

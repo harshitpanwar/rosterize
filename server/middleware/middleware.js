@@ -43,11 +43,9 @@ module.exports = {
 
             const company = await Company.findById(user.company);
             const department = await Department.findById(user.department);
-
             req.user = user;
             req.company = company;
             req.department = department;
-
             next();
 
         } catch (err) {

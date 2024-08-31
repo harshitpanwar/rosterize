@@ -6,6 +6,16 @@ const leaveSchema = new monogoose.Schema({
         ref: 'User',
         required: [true, 'Please provide a user for this leave.'],
     },
+    company: {
+        type: monogoose.Schema.Types.ObjectId,
+        ref: 'Company',
+        required: [true, 'Please provide a company for this leave.'],
+    },
+    department: {
+        type: monogoose.Schema.Types.ObjectId,
+        ref: 'Department',
+        required: [true, 'Please provide a department for this leave.'],
+    },
     leaveType: {
         type: String,
         enum: ['medical', 'annual'],
