@@ -9,6 +9,8 @@ import {useAuth} from './context/AuthContext';
 import { me } from './api/Auth';
 import Loader from './Components/Loader/Loader';
 import ProtectedRoute from './Components/ProtectedRoute';
+import LandingPage from './pages/LandingPage/LandingPage';
+import AboutUs from './pages/LandingPage/AboutUs';
 
 function App() {
 
@@ -23,6 +25,7 @@ function App() {
   });
 
   if(data){
+    console.log('User:', data);
     setAuth(data);
     setLoading(false);
   }
@@ -42,6 +45,8 @@ function App() {
           <Route path="/*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/landing-page" element={<LandingPage />} />
+          <Route path="/about-us" element={<AboutUs />} />
         </Routes>
       </Router>
     </div>
