@@ -11,6 +11,8 @@ const UserManagement = () => {
 
   const { authData } = useAuth();
   const queryClient = useQueryClient();
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const [users, setUsers] = useState([]);
   const [email, setEmail] = useState("");
@@ -58,8 +60,12 @@ const UserManagement = () => {
     mutationFn: createUser,
     onSuccess: (data) => {
       queryClient.invalidateQueries('users');
+      setMessage('User added successfully');
+      setError('');
     },
     onError: (error) => {
+      setMessage('');
+      setError(error.message);
       console.error('Add user failed:', error);
     },
   });
@@ -67,9 +73,13 @@ const UserManagement = () => {
   const deleteUserMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: (data) => {
+      setMessage('User deleted successfully');
+      setError('');
       queryClient.invalidateQueries('users');
     },
     onError: (error) => {
+      setMessage('');
+      setError(error.message);
       console.error('Delete user failed:', error);
     },
   });
@@ -224,6 +234,10 @@ const UserManagement = () => {
       >
         Add User
       </button>
+        {message && <p className="text-green-500 mt-4">{message}</p>}
+        {error && <p className="text-red-500 mt-4">{error}</p>}
+
+
 
         <div className="mt-8">
           <h3 className="text-xl font-bold mb-4">Search User</h3>
@@ -272,8 +286,6 @@ const UserManagement = () => {
             ))}
           </div>
         </div>
-      
-
     </div>
   );
 };

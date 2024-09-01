@@ -1,5 +1,14 @@
 import axios from '../utils/axiosConfig';
 
+const formatCalendarDataForExcel = (calendarDays) => {
+    const formattedData = calendarDays.map((entry) => ({
+      day: entry.day || 'N/A',
+      status: entry.status || 'OFF',
+    }));
+  
+    return formattedData;
+  };
+  
 export const createUser = async (user) => {
     try {
         const response = await axios.post('/user/create', user);
@@ -20,7 +29,7 @@ export const getUser = async (id) => {
     }
 }
 
-export const updateUser = async (id, user) => {
+export const updateUser = async ({id, user}) => {
     try {
 
         console.log('user', user);
@@ -139,6 +148,15 @@ export const applyLeave = async ({from, to, reason, type}) => {
     }
 }
 
+export const getLeaves = async ({from, to, status}) => {
+    try {
+        const response = await axios.get(`/user/getleaves?from=${from}&to=${to}&status=${status}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to get leaves');
+    }
+}
+
 export const submitReview = async ({title, review, rating}) => {
     try {
         const response = await axios.post(`/user/submitreview`, {title, review, rating});
@@ -157,4 +175,44 @@ export const Dashboard = async () => {
         throw new Error(error?.response?.data?.message || error.message || 'Failed to get dashboard data');
     }
 
+}
+
+export const handleDownload = async (calendarDays) => {
+    const formattedData = formatCalendarDataForExcel(calendarDays);
+    
+    try {
+      const response = await axios.post('/user/downloadschedule', formattedData, {
+        responseType: 'blob',
+      });
+      return response;
+    } catch (error) {
+      console.error('Error downloading the Excel file', error);
+    }
+  };
+  
+export const notifications = async () => {
+    try {
+        const response = await axios.get('/user/notifications');
+        return response.data;
+    } catch (error) {
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to get notifications');
+    }
+}
+
+export const createNotification = async () => {
+    try {
+        const response = await axios.post('/user/createnotification');
+        return response.data;
+    } catch (error) {
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to create notification');
+    }
+}
+
+export const pdfSummary = async ({from, to}) => {
+    try {
+        const response = await axios.get(`/user/pdfsummary?from=${from}&to=${to}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to download pdf');
+    }
 }

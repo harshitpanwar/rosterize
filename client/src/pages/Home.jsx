@@ -11,7 +11,7 @@ import Billing from './Billing';
 import { useAuth } from '../context/AuthContext';
 import UserManagement from './UserManagement';
 import SubmitReview from './SubmitReview';
-import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings, ChartPie, BriefcaseMedical, Bell } from 'lucide-react';
+import { HomeIcon, User, LogOut, Receipt, Calendar, Star, ChartNoAxesGantt, Settings, ChartPie, BriefcaseMedical, Bell, DollarSign } from 'lucide-react';
 import ApplyLeave from './ApplyLeave';
 import StatusPage from './Status';
 import UserProfile from './Profile/UserProfile';
@@ -21,6 +21,10 @@ import AdminDashboard from './Admin/AdminDashboard';
 import ManageCustomerRatings from './Admin/ManageReviews';
 import ManagePrice from './Admin/ManagePrice';
 import EmployeeProfile from './Profile/EmployeeProfile'; 
+import HodDashboard from './Dashboard/HodDashboard';
+import HodSchedule from './Schedule/HodSchedule';
+import Notifications from './Notifications';
+import Payslips from './Payslips';
 
 const roleToRoute = {
   superadmin: [
@@ -97,26 +101,52 @@ const roleToRoute = {
   ],
   departmenthead: [
     {
+      'path': '/',
+      'component': <HodDashboard />,
+      'name': 'Dashboard',
+      'icon': <HomeIcon />
+    },
+    {
       'path': '/profile',
-      'component': <CompanyProfile />,
-      'name': 'Company Profile'
+      'component': <UserProfile />,
+      'name': 'Profile',
+      'icon': <User />
     },
     {
-      'path': '/department',
-      'component': <Department />,
-      'name': 'Department'
+      'path': '/clockinout',
+      'component': <ClockInOut />,
+      'name': 'Clock In/Out',
+      'icon': <LogOut />
     },
     {
-      'path': '/approveleaves',
-      'component': <ApproveRejectLeaves />,
-      'name': 'Approve/Reject Leaves',
-      'icon': <Bell/>
+      'path': '/leave',
+      'component': <ApplyLeave />,
+      'name': 'Apply Leave',
+      'icon': <BriefcaseMedical />
+    },
+    {
+      'path': '/schedule',
+      'component': <HodSchedule />,
+      'name': 'Schedule',
+      'icon': <Calendar />
+    },
+    {
+      'path': '/status',
+      'component': <StatusPage />,
+      'name': 'Status',
+      'icon': <ChartPie />
     },
     {
       'path': '/employeeprofile',
       'component': <EmployeeProfile />,
       'name': 'Employee Profile',
       'icon': <User/>
+    },
+    {
+      'path': '/approveleaves',
+      'component': <ApproveRejectLeaves />,
+      'name': 'Approve/Reject Leaves',
+      'icon': <Bell/>
     }
   ],
   user: [
@@ -151,6 +181,12 @@ const roleToRoute = {
       'icon': <BriefcaseMedical />
     },
     {
+      'path': '/payslips',
+      'component': <Payslips />,
+      'name': 'Payslips',
+      'icon': <DollarSign />
+    },
+    {
       'path': '/status',
       'component': <StatusPage />,
       'name': 'Status',
@@ -161,6 +197,12 @@ const roleToRoute = {
       'component': <SubmitReview />,
       'name': 'Submit Review',
       'icon': <Star />
+    },
+    {
+      'path': '/notifications',
+      'component': <Notifications />,
+      'name': 'Notifications',
+      'icon': <Bell/> 
     }
   ]
 }

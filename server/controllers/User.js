@@ -4,7 +4,10 @@ const ClockInOut = require('../models/ClockInOut');
 const Status = require('../models/Status');
 const Leave = require('../models/Leave');
 const Review = require('../models/Review');
-const { companyAdmin, superAdmin } = require('../helpers/User/dashboard');
+const Notification = require('../models/Notification');
+const { companyAdmin, superAdmin, departmentHead, user: userFn } = require('../helpers/User/dashboard');
+const XLSX = require('xlsx');
+const {getUserWorkSummary} = require('../helpers/User/pdfSummary');
 
 module.exports = {
     getUser: async(req, res) => {
@@ -123,13 +126,16 @@ module.exports = {
             if (!email && email!="") {
                 return res.status(400).send('Email is required');
             }
-
-            const users = await User.find({ 
+            const findCondition = {
                 email: { $regex: `^${email}`, $options: 'i' }, 
                 company: req.user.company,
-                role: 'user',
-                role: { $in: ['departmenthead', 'user'] } 
-            });
+                role: { $in: ['departmenthead', 'user'] }
+            };
+            if(req.user.role === 'departmenthead' || req.user.role === 'user') {
+                findCondition.department = req.department;
+            }
+
+            const users = await User.find(findCondition).populate('companyRole').populate('department');
 
             if (!users) {
                 return res.status(404).send('User not found');
@@ -159,13 +165,24 @@ module.exports = {
     },
     list: async(req, res) => {
         try {
-            // console.log("fjdaskf", req.user);
-            const users = await User.find({ 
-                company: req.user.company, 
+
+            const {email} = req.query;
+            const findCondition = {                
+                company: req.company._id, 
                 status: 'active',
-                // departmenthead and user
                 role: { $in: ['departmenthead', 'user'] }
-            }).populate('companyRole').populate('department');
+            };
+
+            if(req.user.role === 'departmenthead' || req.user.role === 'user') {
+                findCondition.department = req.user.department
+            }
+
+            if(email && email!="") {
+                findCondition.email = { $regex: `^${email}`, $options: 'i' };
+            }
+
+            const users = await User.find(findCondition).populate('companyRole').populate('department');
+
             res.send(users);
         } catch (error) {
             res.status(500).send('Error fetching users');
@@ -185,7 +202,8 @@ module.exports = {
             today.setHours(0, 0, 0, 0);
             const clockin = await ClockInOut.findOne({ 
                 user: req.user.id, 
-                createdAt: { $gte: today }
+                createdAt: { $gte: today },
+                assigned: false
             });
             const clockIn = new Date();
             const [hours, minutes] = clockInTime.split(':');
@@ -229,7 +247,8 @@ module.exports = {
             today.setHours(0, 0, 0, 0);
             const clockin = await ClockInOut.findOne({ 
                 user: req.user.id, 
-                createdAt: { $gte: today }
+                createdAt: { $gte: today },
+                assigned: false
             });
             // if user has already clocked in, set the current time as clock in time
             if (clockin.clockIn && !clockin.clockOut) {
@@ -385,9 +404,11 @@ module.exports = {
             }
             const user = req.user.id;
             const company = req.user.company;
+            const department = req.user.department;
             const newLeave = new Leave({
                 user,
                 company,
+                department,
                 leaveType: type,
                 startDate: from,
                 endDate: to,
@@ -404,6 +425,34 @@ module.exports = {
             return res.status(500).send(error.message || 'Error applying for leave');
         }
 
+    },
+    getLeaves: async(req, res) => {
+        try {
+            const user = req.user.id;
+            const company = req.user.company;
+            const {from, to, status} = req.query;
+            const findCondition = {
+                user,
+                company
+            };
+
+            if(from && to) {
+                findCondition.startDate = { $gte: from, $lte: to };
+            }
+            if(status) {
+                findCondition.status = status;
+            }
+
+            const leaves = await Leave.find(findCondition);
+
+            if (leaves.length > 0) {
+                return res.send(leaves);
+            }
+
+            return res.send('No leave found');
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error fetching leaves');
+        }
     },
     submitReview: async(req, res) => {
         try {
@@ -454,10 +503,12 @@ module.exports = {
                     return res.send(data);
                 
                 case 'departmenthead':
-                    return res.send('Department Head Dashboard');
+                    data = await departmentHead(user.department, company_id);
+                    return res.send(data);
 
                 case 'user':
-                    return res.send('User Dashboard');
+                    data = await userFn(user_id, user.department, company_id);
+                    return res.send(data);
 
                 default:
                     return res.status(403).send('Unauthorized');
@@ -469,6 +520,87 @@ module.exports = {
         } catch (error) {
             return res.status(500).send(error.message || 'Error fetching dashboard');
         }
+    },
+    downloadSchedule: async(req, res) => {
+        try {
+            const scheduleData = req.body;
+
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(scheduleData);
+          
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Schedule');
+          
+            const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+          
+            res.setHeader('Content-Disposition', 'attachment; filename="Schedule.xlsx"');
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            
+            res.send(buffer);
+          
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error downloading schedule');
+        }
+    },
+    notifications: async(req, res) => {
+        try {
+            const user_id = req.user._id;
+            console.log(user_id);
+
+            // order by latest first 
+            const notifications = await Notification.find({ user: user_id, read: false }).sort({ createdAt: -1 });
+            res.send(notifications);
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error fetching notifications');
+        }
+    },
+    readNotification: async(req, res) => {
+        try {
+            const notification_id = req.params.notification_id;
+            const notification = await Notification.findById(notification_id);
+            if (!notification) {
+                return res.status(404).send('Notification not found');
+            }
+            notification.read = true;
+            await notification.save();
+            res.send('Notification read');
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error reading notification');
+        }
+    },
+    createNotification: async(req, res) => {
+        try {
+            const {title, message, user} = req.body;
+            if (!title || !message || !user) {
+                return res.status(400).send('All fields are required');
+            }
+            const newNotification = new Notification({
+                title,
+                message,
+                user,
+                company: req.user.company,
+                read: false,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            await newNotification.save();
+            res.send('Notification created successfully');
+        } catch (error) {
+            return res.status(500).send(error.message || 'Error creating notification');
+        }
+    },
+    pdfSummary: async(req, res) => {
+        try {
+            console.log(req.query);
+            const userId = req.user._id;
+            const { from, to } = req.query; 
+            console.log(from, to, userId);
+            const workSummary = await getUserWorkSummary(userId, from, to);
+            console.log(workSummary);
+            res.json(workSummary);
+        } catch (error) {
+            res.status(500).json({ error: 'An error occurred while fetching work summary.' });
+        }
+    
     }
 
 }

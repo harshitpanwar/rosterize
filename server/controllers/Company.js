@@ -63,21 +63,18 @@ module.exports = {
 
     },
     updateCompany: async (req, res) => {
-
         try {
 
-            console.log(req.body);
+            // console.log(req.body);
             const company_id = req.params.company_id;
             const user_id = req.user._id;
-            const { name, address, phone, UEN, email, employeeCount, industry, message, website } = req.body
+            const { name, address, phone, UEN, email, industry, website } = req.body
             const updatedCompany = await Company.findByIdAndUpdate(company_id, {
                 name,
                 address,
                 phone,
                 UEN,
-                employeeCount,
                 industry,
-                message,
                 website
             }, { new: true });
 
@@ -89,7 +86,9 @@ module.exports = {
             if(!updatedUser) {
                 res.status(500).send('Error updating user')
             }
-            res.send(updatedCompany);
+
+            console.log(updatedCompany, updatedUser)
+            res.send("Updated Successfully");
 
         } catch (error) {
             return res.status(500).send(error.message || 'Error updating company');

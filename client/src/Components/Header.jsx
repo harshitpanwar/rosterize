@@ -1,5 +1,6 @@
 import React from 'react'
 import { useAuth } from '../context/AuthContext'
+import companyLogo from '../assets/rosterize.png';
 
 const Header = () => {
 
@@ -14,9 +15,12 @@ const Header = () => {
       >
         ☰
       </button> */}
-      <p className="text-sm text-white sm:text-xl">{authData?.role}</p>
+      <div className='flex justify-center items-center gap-2'>
+        <img src={companyLogo} width="60px" alt="Logo" className="mx-auto" />
+        <p className="text-sm text-white hidden sm:text-xl sm:block">{authData?.role}</p>
+      </div>
       <div className="flex items-center">
-        <span className="mr-4 text-white text-sm sm:text-md">{authData?.email}</span>
+      <span className="mr-4 text-white text-sm sm:text-md">{authData?.email}</span>
         <button className="bg-gray-700 text-white p-2 rounded"
           onClick={() => {
             logout();

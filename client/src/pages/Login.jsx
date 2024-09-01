@@ -65,7 +65,6 @@ export default function Login() {
             {mutation.isPending ? 'Logging in...' : 'Login'}
           </button>
         </div>
-        {/* error  */}
         {mutation.isError && <p className="text-red-500 text-sm mt-2">{mutation.error.message}</p>}
       </form>
     </div>

@@ -1,55 +1,127 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getClockInFromToDate } from '../../api/User';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getClockInFromToDate, getLeaves, handleDownload } from '../../api/User';
 import Loader from '../../Components/Loader/Loader';
 
 const Schedule = () => {
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const monthToFromToDate = (month) => {
+    const currentYear = new Date().getFullYear();
+    switch (month) {
+      case 'January':
+        return { from: `${currentYear}-01-01`, to: `${currentYear}-01-31` };
+      case 'February':
+        return { from: `${currentYear}-02-01`, to: `${currentYear}-02-29` }; // Consider leap year
+      case 'March':
+        return { from: `${currentYear}-03-01`, to: `${currentYear}-03-31` };
+      case 'April':
+        return { from: `${currentYear}-04-01`, to: `${currentYear}-04-30` };
+      case 'May':
+        return { from: `${currentYear}-05-01`, to: `${currentYear}-05-31` };
+      case 'June':
+        return { from: `${currentYear}-06-01`, to: `${currentYear}-06-30` };
+      case 'July':
+        return { from: `${currentYear}-07-01`, to: `${currentYear}-07-31` };
+      case 'August':
+        return { from: `${currentYear}-08-01`, to: `${currentYear}-08-31` };
+      case 'September':
+        return { from: `${currentYear}-09-01`, to: `${currentYear}-09-30` };
+      case 'October':
+        return { from: `${currentYear}-10-01`, to: `${currentYear}-10-31` };
+      case 'November':
+        return { from: `${currentYear}-11-01`, to: `${currentYear}-11-30` };
+      case 'December':
+        return { from: `${currentYear}-12-01`, to: `${currentYear}-12-31` };
+      default: // January
+        return { from: `${currentYear}-01-01`, to: `${currentYear}-01-31` };
+    }
+  };
 
-  const fromToFormat = (month) => {
-    
-  }
-  // Fetch the schedule data
-  const { loading, error, data } = useQuery({
+  const [selectedMonth, setSelectedMonth] = useState('January');
+
+  const { isLoading, error, data } = useQuery({
     queryKey: ['schedule', selectedMonth],
-    queryFn: () => getClockInFromToDate({}),
+    queryFn: () => getClockInFromToDate(monthToFromToDate(selectedMonth)),
     enabled: !!selectedMonth,
   });
 
-  if(data) console.log(data);
+  const { data: leavesData, isLoading: leavesLoading, isError: leavesError } = useQuery({
+    queryKey: ['leaves', selectedMonth],
+    queryFn: () => getLeaves({ status: 'approved', ...monthToFromToDate(selectedMonth) }),
+  });
 
+  const downloadDataMutation = useMutation({
+    mutationFn: handleDownload,
+    onSuccess: (data) => {
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Schedule_${selectedMonth}_${new Date().getFullYear()}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-  // Dummy data for the schedule
-  const scheduleData = [
-    { day: '1', status: '0800 - 1700' },
-    { day: '2', status: 'OFF' },
-    { day: '3', status: 'OFF' },
-    { day: '4', status: '0800 - 1700' },
-    { day: '5', status: '0800 - 1700' },
-    { day: '6', status: '0800 - 1700' },
-    { day: '7', status: '0800 - 1700' },
-    { day: '8', status: 'OFF' },
-    { day: '9', status: '0800 - 1700' },
-    { day: '10', status: '0800 - 1700' },
-    { day: '11', status: 'OFF' },
-    { day: '12', status: '0800 - 1700' },
-    { day: '13', status: '0800 - 1700' },
-    { day: '14', status: '0800 - 1700' },
-    { day: '15', status: '0800 - 1700' },
-    { day: '16', status: '0800 - 1700' },
-    { day: '17', status: 'OFF' },
-    { day: '18', status: '0800 - 1700' },
-    { day: '19', status: 'OFF' },
-    { day: '20', status: '0800 - 1700' },
-    { day: '21', status: '0800 - 1700' },
-    { day: '22', status: '0800 - 1700' },
-    { day: '23', status: 'OFF' },
-    { day: '24', status: '0800 - 1700' },
-    { day: '25', status: 'OFF' },
-    { day: '26', status: 'AL' },
-    { day: '27', status: 'AL' },
-    { day: '28', status: 'AL' },
-  ];
+    }
+  })
+
+  if (isLoading || leavesLoading) return <Loader />;
+  if (error || leavesError) return <div>Error loading schedule or leaves.</div>;
+
+  const mapDataToSchedule = (data) => {
+    const schedule = {};
+    data.forEach(entry => {
+      const date = new Date(entry.clockIn).getDate();
+      const clockInTime = new Date(entry.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const clockOutTime = new Date(entry.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      schedule[date] = `${clockInTime} - ${clockOutTime}`;
+    });
+    return schedule;
+  };
+
+  const mapLeavesToSchedule = (leavesData) => {
+    console.log("leavesData", leavesData);
+    const leaves = {};
+    leavesData.forEach(entry => {
+      const startDate = new Date(entry.startDate).getDate();
+      const endDate = new Date(entry.endDate).getDate();
+      const leaveTypeAbbreviation = entry.leaveType === 'annual' ? 'AL' : 'ML';
+
+      for (let i = startDate; i <= endDate; i++) {
+        leaves[i] = leaveTypeAbbreviation;
+      }
+    });
+    return leaves;
+  };
+
+  const scheduleData = mapDataToSchedule(data);
+  const leavesSchedule = mapLeavesToSchedule(leavesData && Array.isArray(leavesData) ? leavesData : []);
+
+  const currentYear = new Date().getFullYear();
+  const monthIndex = new Date(`${selectedMonth} 1, ${currentYear}`).getMonth();
+  const firstDayOfMonth = new Date(currentYear, monthIndex, 1);
+  const lastDayOfMonth = new Date(currentYear, monthIndex + 1, 0);
+
+  const startDay = firstDayOfMonth.getDay();
+  const totalDaysInMonth = lastDayOfMonth.getDate();
+
+  const calendarDays = [];
+  for (let i = 0; i < startDay; i++) {
+    calendarDays.push({ day: null, status: '' }); // Empty cells before the 1st day
+  }
+  for (let i = 1; i <= totalDaysInMonth; i++) {
+    const leaveStatus = leavesSchedule[i];
+    const dayStatus = leaveStatus || scheduleData[i] || 'OFF';
+    calendarDays.push({
+      day: i,
+      status: dayStatus,
+      isLeave: !!leaveStatus,
+    });
+  }
+
+  const downloadExcel = () => {
+    downloadDataMutation.mutate(calendarDays);
+  }
+
 
   return (
     <div className="p-6 flex flex-col items-center">
@@ -66,9 +138,17 @@ const Schedule = () => {
           <option value="January">January</option>
           <option value="February">February</option>
           <option value="March">March</option>
-          {/* Add more months as needed */}
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+          <option value="November">November</option>
+          <option value="December">December</option>
         </select>
-        <button className="ml-4 bg-blue-900 text-white py-2 px-4 rounded shadow">
+        <button className="ml-4 bg-blue-900 text-white py-2 px-4 rounded shadow" onClick={downloadExcel}>
           Download
         </button>
       </div>
@@ -80,18 +160,20 @@ const Schedule = () => {
           </div>
         ))}
 
-        {scheduleData.map((entry, index) => (
+        {calendarDays.map((entry, index) => (
           <div
             key={index}
             className={`text-center p-4 border ${
-              entry.status === 'OFF'
+              entry.isLeave
+                ? 'border-blue-500 text-blue-500'
+                : entry.status === 'OFF'
                 ? 'border-red-500 text-red-500'
-                : entry.status === 'AL'
-                ? 'border-teal-500 text-teal-500'
-                : 'border-gray-500 text-gray-900'
+                : entry.status !== ''
+                ? 'border-gray-500 text-gray-900'
+                : 'border-transparent'
             }`}
           >
-            <div>{entry.day}</div>
+            {entry.day !== null && <div>{entry.day}</div>}
             <div>{entry.status}</div>
           </div>
         ))}

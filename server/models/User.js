@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema({
             type: String,
             // required: [true, 'Please provide an employee ID for this user.'],
             },
+        balanceOfAnnualLeaves: {
+            type: Number,
+            default: 0,
+        },
         lastLogin: {
             type: Date,
             },

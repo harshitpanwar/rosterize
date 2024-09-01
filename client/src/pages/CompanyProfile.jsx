@@ -36,11 +36,9 @@ const CompanyProfile = () => {
       setError(error.message);
     }
   })
-  console.log(authData)
   const saveCompany = () => {
     setCompanyData({...companyData, company_id: authData.company});
-    console.log("companyData", companyData);
-    updateMutation.mutate(companyData);
+    updateMutation.mutate({...companyData, company_id: authData.company});
   }
 
 

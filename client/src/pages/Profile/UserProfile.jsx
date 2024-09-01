@@ -202,20 +202,7 @@ const UserProfile = () => {
           </div>
         </div>
 
-        <div className="flex justify-between">
-          <button
-            onClick={handleCancel}
-            className="bg-red-600 text-white px-6 py-2 rounded-md shadow hover:bg-red-500 transition duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSaveChanges}
-            className="bg-blue-800 text-white px-6 py-2 rounded-md shadow hover:bg-blue-700 transition duration-200"
-          >
-            Save Changes
-          </button>
-        </div>
+
       </div>
     </div>
   );
