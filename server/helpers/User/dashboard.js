@@ -139,11 +139,14 @@ module.exports = {
                 const diff = clockOut - clockIn;
                 if(!doc.assigned) console.log('diff', diff);
                 const hours = diff / 1000 / 60 / 60;
-                if(doc.assigned) {
-                    totalHoursAssigned += hours;
-                }
-                else {
-                    totalHoursWorked += hours;
+
+                if(clockIn && clockOut){
+                    if(doc.assigned) {
+                        totalHoursAssigned += hours;
+                    }
+                    else {
+                        totalHoursWorked += hours;
+                    }
                 }
             });
 
