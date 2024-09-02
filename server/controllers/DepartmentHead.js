@@ -10,7 +10,10 @@ module.exports = {
     getLeaves: async function (req, res) {
             try {
                 const {status} = req.query;
-                const findCondition = {};
+                const department_id = req.department;
+                const findCondition = {
+                    department: department_id
+                };
                 if(status) findCondition.status = status;
                 const leaves = await Leave.find(findCondition).populate('user', 'name email').populate('department', 'name').populate('company', 'name');
                 return res.status(200).json(leaves);
