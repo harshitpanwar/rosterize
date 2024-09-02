@@ -24,7 +24,7 @@ const Header = () => {
         <button className="bg-gray-700 text-white p-2 rounded"
           onClick={() => {
             logout();
-            window.location.href = '/login';
+            window.location.href = '/landing-page';
           }}
         >
           Logout

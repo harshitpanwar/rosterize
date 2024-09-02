@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema({
             },
         balanceOfAnnualLeaves: {
             type: Number,
-            default: 0,
+            default: 16,
         },
         lastLogin: {
             type: Date,

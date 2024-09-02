@@ -12,7 +12,7 @@ const ProtectedRoute = ({
   if(loading) return <Loader/>
 
   if (!authData || !authData?.email) {
-    return <Navigate to='/login' replace />;
+    return <Navigate to='/landing-page' replace />;
   }
 
   return children;

@@ -24,12 +24,12 @@ function LandingPage() {
             </p>
             {/* Buttons */}
             <div className="flex justify-center lg:justify-start mt-10 space-x-4">
-              <button className="bg-[#0E2442] text-white py-2 px-9 ">
+              <a className="bg-[#0E2442] text-white py-2 px-9 " href="/register">
                 Register
-              </button>
-              <button className="bg-[#2E2E41] text-white py-2 px-9 ">
+              </a>
+              <a className="bg-[#2E2E41] text-white py-2 px-9" href="/login">
                 Login
-              </button>
+              </a>
               <button className="bg-[#0E2442] text-white py-2 px-9 ">
                 Enquiries
               </button>

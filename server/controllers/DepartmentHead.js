@@ -38,6 +38,12 @@ module.exports = {
             });
             await notification.save();
 
+            // reduce the leave balance from the user account
+
+            const user = await User.findById(leave.user);
+            user.balanceOfAnnualLeaves -= leave.days;
+            await user.save();
+
             return res.status(200).json(leave);
         } catch (error) {
             return res.status(500).json({ message: error.message });
