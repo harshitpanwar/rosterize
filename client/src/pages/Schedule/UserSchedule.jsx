@@ -52,7 +52,7 @@ const Schedule = () => {
   const downloadDataMutation = useMutation({
     mutationFn: handleDownload,
     onSuccess: (data) => {
-      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const blob = new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
