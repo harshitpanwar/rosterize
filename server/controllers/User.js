@@ -275,7 +275,8 @@ module.exports = {
             today.setHours(0, 0, 0, 0);
             const clockin = await ClockInOut.findOne({ 
                 user: req.user.id, 
-                createdAt: { $gte: today }
+                createdAt: { $gte: today },
+                assigned: false
             });
 
             if (clockin) {
@@ -405,6 +406,15 @@ module.exports = {
             const user = req.user.id;
             const company = req.user.company;
             const department = req.user.department;
+
+            const numberOfDays = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24));
+            // check if the user has this much leave balance
+
+            const userData = User.findById(user);
+            if(userData.balanceOfAnnualLeaves < numberOfDays) {
+                return res.send({ error: 'Insufficient leave balance' });
+            }
+
             const newLeave = new Leave({
                 user,
                 company,
