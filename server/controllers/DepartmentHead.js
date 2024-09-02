@@ -43,9 +43,11 @@ module.exports = {
 
             // reduce the leave balance from the user account
 
-            const user = await User.findById(leave.user);
-            user.balanceOfAnnualLeaves -= leave.days;
-            await user.save();
+            if(status === 'approved') {
+                const user = await User.findById(leave.user);
+                user.balanceOfAnnualLeaves -= leave.days;
+                await user.save();
+            }
 
             return res.status(200).json(leave);
         } catch (error) {
