@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Company = require('../models/Company');
+const sendMail = require('../helpers/Mail/sendMail');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -15,7 +16,6 @@ module.exports = {
             if (userExists.role === 'companyadmin' || userExists.role === 'department' || userExists.role === 'user') {
                 // find the company
                 const company = await Company.findById(userExists.company);
-                console.log("Company: ", company);
                 if(!company) {
                     return res.status(400).send({ error: 'Company not found' });
                 }
@@ -54,5 +54,58 @@ module.exports = {
         catch (err) {
             return res.status(400).send({ error: 'Registration failed' });
         }
+    },
+    async forgotPassword(req, res) {
+        try {
+            const { email } = req.body;
+            const user = await User.findOne({ email });
+            if (!user) {
+                return res.status(400).send({ error: 'User not found' });
+            }
+            const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
+            user.resetCode = resetCode;
+            await user.save();
+
+            const subject = 'Password Reset';
+            const message = `Your password reset code is ${resetCode}`;
+            const isSendMail = await sendMail(email, subject, message);
+            if(isSendMail?.error) throw new Error(isSendMail.message || 'Error sending email');
+
+            return res.send({ message: 'Reset link sent to email' });
+        }
+        catch (err) {
+            return res.status(400).send({ error: err.message || 'Password reset failed' });
+        }
+    },
+    async resetPassword(req, res) {
+        try {
+            const { email, password, code } = req.body;
+            if(!email || !password || !code) {
+                return res.status(400).send({ error: 'Please provide email, password and code' });
+            }
+            const user = await User.findOne({ email }); 
+            if (!user) {
+                return res.status(400).send({ error: 'User not found' });
+            }
+            if(!user.resetCode) {
+                return res.status(400).send({ error: 'Please initiate forgot password request first.' });
+            }
+            if(user.resetCode !== code) {
+                return res.status(400).send({ error: 'Invalid code' });
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+            user.resetCode = null;
+            await user.save();
+            return res.send({ message: 'Password reset successful' });
+
+        }
+        catch (err) {
+            return res.status(400).send({ error: err.message || 'Failed to reset password' });
+        }
     }
+
+    
+
+
 }

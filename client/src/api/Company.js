@@ -69,3 +69,15 @@ export const updateCompanyStatus = async ({ company_id, status }) => {
         throw new Error(error.message || 'Error updating company status');
     }
 }
+
+export const updateCompanyPlan = async ({ company_id, plan_id }) => {
+    try {
+        if(!company_id || !plan_id) {
+            throw new Error('Company and Plan ID required');
+        }
+        const response = await axios.post(`/company/plan`, { plan_id, company_id });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.message || 'Error updating company plan');
+    }
+}

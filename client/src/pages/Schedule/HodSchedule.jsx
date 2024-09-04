@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { format, startOfWeek, addDays } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSchedule, addSchedule } from "../../api/Hod";
+import { getSchedule, addSchedule, downloadSchedule } from "../../api/Hod";
 import { listUsers } from "../../api/User";
 import { useAuth } from "../../context/AuthContext";
+import Loader from "../../Components/Loader/Loader";
 
 const getCurrentWeek = () => {
     const start = startOfWeek(new Date(), { weekStartsOn: 0 });
@@ -49,6 +50,23 @@ const ScheduleComponent = () => {
         }
     });
 
+    const downloadMutation = useMutation({
+        mutationFn: downloadSchedule,
+        onSuccess: (data) => {
+            const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `schedule.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    });
+
+
     const currentWeek = getCurrentWeek();
 
     const getScheduleForDay = (userId, date) => {
@@ -79,7 +97,7 @@ const ScheduleComponent = () => {
         setCurrentEdit({ ...currentEdit, [e.target.name]: e.target.value });
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = (setOff) => {
         // Convert times to UTC
         const clockInUTC = new Date(`${currentEdit.date}T${currentEdit.clockIn}:00Z`).toISOString();
         const clockOutUTC = new Date(`${currentEdit.date}T${currentEdit.clockOut}:00Z`).toISOString();
@@ -87,20 +105,48 @@ const ScheduleComponent = () => {
         const addScheduleObject = {
             user: currentEdit.userId,
             company: authData.company,
-            clockIn: clockInUTC,
-            clockOut: clockOutUTC,
+            clockIn: setOff=="OFF"? setOff: clockInUTC,
+            clockOut: setOff=="OFF"? setOff: clockOutUTC,
             date: currentEdit.date,
         };
     
         addScheduleMutation.mutate(addScheduleObject);
     };
+    const downloadExcel = async () => {
+        // const data = await downloadDataMutation.mutateAsync({ from, to });
+        downloadMutation.mutate({ from, to });
+    }
+
+    if (isLoading || usersLoading) return <Loader />;
         
     return (
         <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Schedule</h2>
+            <div className='flex justify-between'>
+                <h1 className="text-2xl font-bold mb-6">Schedule</h1>
+                {/* <div>
+                    <input
+                        type="date"
+                        value={from}
+                        onChange={(e) => setFrom(e.target.value)}
+                        className="border p-2 rounded-md"
+                    />
+                    <input
+                        type="date"
+                        value={to}
+                        onChange={(e) => setTo(e.target.value)}
+                        className="border p-2 rounded-md"
+                    />
+                </div> */}
+                <div>
+                <button className="bg-blue-900 text-white py-2 px-4 rounded shadow" onClick={downloadExcel} disabled={downloadMutation?.isPending}>
+                    {downloadMutation?.isPending ? 'Downloading...' : 'Download Excel'}
+                </button>
+                </div>
+            </div>
+
             <div className="overflow-x-auto">
                 <div className="min-w-[1000px] grid grid-cols-8 gap-2 text-center text-sm md:text-base">
-                    <div></div> {/* Empty space for user names */}
+                    <div></div>
                     {currentWeek.map((date, idx) => (
                         <div key={idx} className="font-semibold border p-2">
                             {format(new Date(date), "EEE dd/MM")}
@@ -128,7 +174,6 @@ const ScheduleComponent = () => {
                 </div>
             </div>
 
-            {/* Popup for editing schedule */}
             {isPopupOpen && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-4 rounded-md w-full max-w-lg">
@@ -153,19 +198,28 @@ const ScheduleComponent = () => {
                                 className="w-full mt-1 p-2 border rounded-md"
                             />
                         </div>
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                onClick={() => setIsPopupOpen(false)}
-                                className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
-                            >
-                                Cancel
+                        <div className="flex justify-between space-x-2">
+
+                            <button 
+                                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" 
+                                onClick={() => handleUpdate('OFF')}>
+                                    Set OFF
                             </button>
-                            <button
-                                onClick={handleUpdate}
-                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                            >
-                                Update
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setIsPopupOpen(false)}
+                                    className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdate}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                >
+                                    Update
+                                </button>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>

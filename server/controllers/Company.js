@@ -6,7 +6,7 @@ module.exports = {
     getCompany: async(req, res) => {
         try {
             const company_id = req.params.company_id;
-            const company = await Company.findById(company_id).populate('createdBy');
+            const company = await Company.findById(company_id).populate('createdBy').populate('subscriptionPlan', 'name');
     
             if (!company) {
                 res.status(404).send('Company not found')
@@ -65,7 +65,6 @@ module.exports = {
     updateCompany: async (req, res) => {
         try {
 
-            // console.log(req.body);
             const company_id = req.params.company_id;
             const user_id = req.user._id;
             const { name, address, phone, UEN, email, industry, website } = req.body
@@ -138,6 +137,21 @@ module.exports = {
             return res.send(updatedCompany);
         } catch (error) {
             res.status(500).send(error.message || 'Error updating company status');
+        }
+    },
+    updateCompanyPlan: async(req, res) => {
+        try {
+            const { company_id, plan_id } = req.body;
+            if (!company_id || !plan_id) {
+                return res.status(400).send('Please provide company_id and plan_id');
+            }
+            const updatedCompany = await Company.findByIdAndUpdate(company_id, { subscriptionPlan: plan_id }, { new: true });
+            if (!updatedCompany) {
+                return res.status(500).send('Error updating company plan')
+            }
+            return res.send(updatedCompany);
+        } catch (error) {
+            res.status(500).send(error.message || 'Error updating company plan');
         }
     }
 }

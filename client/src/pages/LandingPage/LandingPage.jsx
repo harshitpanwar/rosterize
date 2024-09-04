@@ -1,5 +1,6 @@
 import React from "react";
 import img from "../../assets/img.png";
+import { Link } from 'react-router-dom';
 
 function LandingPage() {
   return (
@@ -24,18 +25,18 @@ function LandingPage() {
             </p>
             {/* Buttons */}
             <div className="flex justify-center lg:justify-start mt-10 space-x-4">
-              <a className="bg-[#0E2442] text-white py-2 px-9 " href="/register">
+              <Link to="/register" className="bg-[#0E2442] text-white py-2 px-9">
                 Register
-              </a>
-              <a className="bg-[#2E2E41] text-white py-2 px-9" href="/login">
+              </Link>
+              <Link to="/login" className="bg-[#2E2E41] text-white py-2 px-9">
                 Login
-              </a>
-              <button className="bg-[#0E2442] text-white py-2 px-9 ">
+              </Link>
+              <Link to="/enquiries" className="bg-[#0E2442] text-white py-2 px-9 ">
                 Enquiries
-              </button>
-              <button className="bg-[#2E2E41] text-white py-2 px-9 ">
+              </Link>
+              <Link to="/about-us" className="bg-[#2E2E41] text-white py-2 px-9">
                 About Us
-              </button>
+              </Link> 
             </div>
           </div>
         </div>

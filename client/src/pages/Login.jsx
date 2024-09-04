@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import companyLogo from '../assets/rosterize.png';
 import { login } from '../api/Auth';
+import { Link } from 'react-router-dom';
 
 import {useAuth} from '../context/AuthContext'
 
@@ -65,6 +66,9 @@ export default function Login() {
             {mutation.isPending ? 'Logging in...' : 'Login'}
           </button>
         </div>
+        <Link to="/forgot-password" className="text-blue-600 text-sm">
+          Forgot Password?
+        </Link>
         {mutation.isError && <p className="text-red-500 text-sm mt-2">{mutation.error.message}</p>}
       </form>
     </div>

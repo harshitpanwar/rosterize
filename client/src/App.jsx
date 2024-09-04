@@ -11,6 +11,8 @@ import Loader from './Components/Loader/Loader';
 import ProtectedRoute from './Components/ProtectedRoute';
 import LandingPage from './pages/LandingPage/LandingPage';
 import AboutUs from './pages/LandingPage/AboutUs';
+import ForgotPassword from './pages/ForgotPassword';
+import EnquiriesPage from './pages/LandingPage/Enquries';
 
 function App() {
 
@@ -21,6 +23,8 @@ function App() {
     queryFn: () => me(),
     // staleTime: Infinity,
     cacheTime: 0,
+    // don't call api on certain routes
+    enabled: !['/login', '/register', '/forgot-password', '/landing-page', '/about-us', '/enquiries'].includes(window.location.pathname),
     retry: 0,
   });
 
@@ -45,8 +49,10 @@ function App() {
           <Route path="/*" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/landing-page" element={<LandingPage />} />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/enquiries" element={<EnquiriesPage />} />
         </Routes>
       </Router>
     </div>

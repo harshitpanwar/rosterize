@@ -7,6 +7,7 @@ const ManageCustomerRatings = () => {
     // const [reviews, setReviews] = useState([]);
     const [selectedRating, setSelectedRating] = useState('');
     const queryClient = useQueryClient();
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -29,7 +30,11 @@ const ManageCustomerRatings = () => {
         mutationFn: updateReviewStatus,
         onSuccess: () => {
             queryClient.invalidateQueries(['ratings']);
-        }
+        },
+        onError: (error) => {
+            setErrorMessage(error.message);
+            console.error('Failed to update review status:', error);
+        },
     });
 
     const changeStatus = (review_id, status) => {
@@ -98,6 +103,7 @@ const ManageCustomerRatings = () => {
 
                     </div>
                 ))}
+                {errorMessage && <div className="text-red-500">{errorMessage}</div>}
             </div>
         </div>
     );

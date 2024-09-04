@@ -17,7 +17,8 @@ export const updateReviewStatus = async ({review_id, status}) => {
         });
         return response.data;
     } catch (error) {
-        throw new Error(error.message || 'Error updating review status');
+        console.error('Error updating review status:', error); 
+        throw new Error(error?.response?.data?.error || 'Error updating review status');
     }
 }
 

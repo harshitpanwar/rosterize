@@ -273,7 +273,7 @@ const UserManagement = () => {
                   </p>
                 </div>
                 {
-                  user.role == 'user' &&
+                  // user.role == 'user' &&
                   <button
                   onClick={() => handleDeleteUser(user._id)}
                   className="text-red-500 text-xl"

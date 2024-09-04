@@ -24,6 +24,11 @@ const companySchema = new mongoose.Schema({
         enum: ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5001-10000', '10001+'],
         required: [true, 'Please provide an employee count for this company.'],
         },
+    subscriptionPlan: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Plan',
+        required: [true, 'Please provide a subscription plan for this company.'],
+    },
     industry: {
         type: String,
         required: [true, 'Please provide an industry for this company.'],

@@ -80,6 +80,12 @@ const roleToRoute = {
       'icon': <Settings />
     },
     {
+      'path': '/schedule',
+      'component': <HodSchedule />,
+      'name': 'Schedule',
+      'icon': <Calendar />
+    },
+    {
       'path': '/billing',
       'component': <Billing />,
       'name': 'Billing',

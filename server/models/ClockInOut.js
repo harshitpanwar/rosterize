@@ -6,6 +6,10 @@ const clockInOutSchema = new mongoose.Schema({
             ref: 'User',
             required: [true, 'Please provide a user for this clock in/out.'],
         },
+        department: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Department'
+        },
         company: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Company',

@@ -22,6 +22,19 @@ module.exports = {
     changeReviewStatus: async(req, res) => {
         try {
             const { review_id, status } = req.body;
+
+            if (!review_id || !status) {
+                return res.status(400).send('Please provide review id and status');
+            }
+
+            // check if already two reviews are approved
+            if (status === 'active') {
+                const approvedReviews = await Review.find({ status: 'active' });
+                if (approvedReviews.length >= 2) {
+                    return res.status(400).send({ error: 'Only two reviews can be approved' });
+                }
+            }
+
             const updatedReview = await Review.findByIdAndUpdate(review_id, { status }, { new: true });
             if (!updatedReview) {
                 return res.status(500).send('Error updating review status')

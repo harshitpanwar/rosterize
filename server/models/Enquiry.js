@@ -11,8 +11,7 @@ const enquirySchema = new mongoose.Schema({
         required: [true, 'Please provide an email for this enquiry.'],
         },
     company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
+        type: String,
         required: [true, 'Please provide a company for this enquiry.'],
         },
     subject: {
@@ -39,4 +38,6 @@ const enquirySchema = new mongoose.Schema({
     
 });
 
-export const Enquiry = mongoose.model('Enquiry', enquirySchema);
+const Enquiry = mongoose.model('Enquiry', enquirySchema);
+
+module.exports = Enquiry;

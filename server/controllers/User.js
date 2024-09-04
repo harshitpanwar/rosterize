@@ -8,6 +8,7 @@ const Notification = require('../models/Notification');
 const { companyAdmin, superAdmin, departmentHead, user: userFn } = require('../helpers/User/dashboard');
 const XLSX = require('xlsx');
 const {getUserWorkSummary} = require('../helpers/User/pdfSummary');
+const {sendMail} = require('../helpers/Mail/sendMail');
 
 module.exports = {
     getUser: async(req, res) => {
@@ -611,6 +612,26 @@ module.exports = {
             res.status(500).json({ error: 'An error occurred while fetching work summary.' });
         }
     
+    },
+    sendResetCode: async(req, res) => {
+        try {
+            const { email } = req.body;
+            if(!email) throw new Error("Please provide Email ID")
+            const user = await User.findOne({ email });
+            if (!user) return res.status(404).send('User not found');
+          
+            const resetCode = crypto.randomInt(1000, 9999).toString();
+            user.resetCode = resetCode;
+            await user.save();
+          
+            await sendMail(user.email, 'Your reset code', `Your reset code is ${resetCode}`);
+          
+            res.send('Reset code sent');
+
+            
+        } catch (error) {
+            return res.status(500).send(error.message || 'Failed to send reset code');
+        }
     }
 
 }

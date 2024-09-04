@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema({
             type: Number,
             default: 16,
         },
+        resetCode: {
+            type: String,
+            default: null
+        },
         lastLogin: {
             type: Date,
             },

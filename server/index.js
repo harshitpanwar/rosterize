@@ -11,6 +11,7 @@ const roleRoutes = require('./routes/Role');
 const adminRoutes = require('./routes/Admin');
 const companyAdminRoutes = require('./routes/CompanyAdmin');
 const departmentHeadRoutes = require('./routes/DepartmentHead');
+const publicRoutes = require('./routes/Public');
 
 require('dotenv').config();
 
@@ -34,7 +35,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
         console.log('Connected to MongoDB');
 
         // Routes
-        app.use('/api/company', companyRoutes);
+        app.use('/api/company', checkAuth, companyRoutes);
         app.use('/api/auth', authRoutes);
         app.use('/api/user', checkAuth, userRoutes);
         app.use('/api/department', departmentRoutes);
@@ -42,6 +43,8 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
         app.use('/api/admin', checkAuth, adminRoutes);
         app.use('/api/companyadmin', checkAuth, companyAdminRoutes);
         app.use('/api/departmenthead', checkAuth, departmentHeadRoutes);
+        app.use('/api/public', publicRoutes);
+
 
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
