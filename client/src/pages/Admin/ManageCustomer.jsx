@@ -52,6 +52,7 @@ const ManageCustomers = () => {
                     className="border p-2 w-full"
                     placeholder="To search, key in email"
                     value={searchEmail}
+                    autoFocus
                     onChange={(e) => setSearchEmail(e.target.value)}
                 />
             </div>
@@ -68,7 +69,7 @@ const ManageCustomers = () => {
                         <p>Contact Phone: {customer.company.phone}</p>
                         <p>Role: {customer.role}</p>
                         <p>Website: {customer.company.website}</p>
-                        <p>Number of Employees: {customer.company.employeeCount}</p>
+                        <p>Number of Employees: {customer?.company?.subscriptionPlan?.range}</p>
                             <div className="flex mt-4">
                             {
                               (customer.company.status === 'pending' || customer.company.status === 'rejected') ? (

@@ -137,6 +137,12 @@ const roleToRoute = {
       'icon': <Calendar />
     },
     {
+      'path': '/payslips',
+      'component': <Payslips />,
+      'name': 'Payslips',
+      'icon': <DollarSign />
+    },
+    {
       'path': '/status',
       'component': <StatusPage />,
       'name': 'Status',

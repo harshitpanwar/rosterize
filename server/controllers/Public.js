@@ -1,6 +1,10 @@
 const Plans = require('../models/Plans');
 const Reviews = require('../models/Review');
 const Enquiry = require('../models/Enquiry');
+const User = require('../models/User');
+const Company = require('../models/Company');
+const bcrypt = require('bcryptjs');
+
 
 module.exports = {
 
@@ -22,12 +26,12 @@ module.exports = {
     postCompany: async(req, res) => {
 
         try {
-            const { name, address, email, phone, password, UEN, employeeCount, industry, website, message } = req.body;
+            const { name, address, email, phone, password, UEN, subscriptionPlan, industry, website, message } = req.body;
 
-            if(!name || !address || !email || !phone || !password || !UEN || !employeeCount || !industry || !website || !message) {
-                res.status(400).send('Please provide all required fields');
+            if(!name || !address || !email || !phone || !password || !UEN || !subscriptionPlan || !industry || !website || !message) {
+               return res.status(400).send({ error: 'Please provide all required fields' });
             }
-    
+        
             const hashedPassword = await bcrypt.hash(password, 10);
     
             const user = new User({
@@ -44,7 +48,8 @@ module.exports = {
                 address,
                 phone,
                 UEN,
-                employeeCount,
+                subscriptionPlan,
+                website,
                 industry,
                 message,
                 createdBy: savedUser._id,
@@ -58,7 +63,7 @@ module.exports = {
             res.send(savedCompany);
     
         } catch (error) {
-            res.status(500).send(error.message || 'Error creating company');
+            res.status(500).send({error: error.message || 'Error creating company'});
         }
 
 

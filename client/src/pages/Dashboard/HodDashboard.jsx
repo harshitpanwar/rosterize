@@ -29,6 +29,49 @@ const HodDashboard = () => {
           <p className="text-gray-700">Today - Employee On MC Counts</p>
         </div>
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div className="p-4 bg-gray-100">
+          <div className="text-lg font-semibold mb-2">Online</div>
+          <div className="space-y-2">
+            {
+              data?.statusOnline?.map((status, index) => (
+                <button key={index} className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">{`${status?.user?.firstName} ${status?.user?.lastName}`}</button>
+              ))
+            }
+            {/* <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">UserA</button>
+            <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">UserB</button>
+            <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">UserC</button>
+            <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">Tony</button> */}
+          </div>
+        </div>
+        <div className="p-4 bg-gray-100">
+          <div className="text-lg font-semibold mb-2 text-red-500">Offline</div>
+          <div className="space-y-2">
+            {
+              data?.statusOffline?.map((status, index) => (
+                <button key={index} className="px-4 py-2 m-2 bg-red-500 text-white rounded-md">{`${status?.firstName} ${status?.lastName}`}</button>
+              ))
+            }
+            {/* <button className="px-4 py-2 m-2 bg-red-500 text-white rounded-md">UserD</button>
+            <button className="px-4 py-2 m-2 bg-red-500 text-white rounded-md">UserD</button> */}
+          </div>
+        </div>
+        <div className="p-4 bg-gray-100">
+          <div className="text-lg font-semibold mb-2 text-blue-500">Medical Leaves</div>
+          <div className="space-y-2">
+            {
+              data?.leaveUsers?.map((leave, index) => (
+                <button key={index} className="px-4 py-2 m-2 bg-teal-500 text-white rounded-md">{`${leave?.user?.firstName} ${leave?.user?.lastName}`}</button>
+              ))
+            }
+            {/* <button className="px-4 py-2 m-2 bg-teal-500 text-white rounded-md">Chao</button>
+            <button className="px-4 py-2 m-2 bg-teal-500 text-white rounded-md">Keng</button>
+            <button className="px-4 py-2 m-2 bg-teal-500 text-white rounded-md">Jess</button>
+            <button className="px-4 py-2 m-2 bg-teal-500 text-white rounded-md">NotHere</button> */}
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };

@@ -6,8 +6,14 @@ import { listUsers } from "../../api/User";
 import { useAuth } from "../../context/AuthContext";
 import Loader from "../../Components/Loader/Loader";
 
-const getCurrentWeek = () => {
-    const start = startOfWeek(new Date(), { weekStartsOn: 0 });
+const getCurrentWeek = (from) => {
+    let start;
+    if(from) {
+        start = startOfWeek(new Date(from), { weekStartsOn: 0 });
+    }
+    else {
+        start = startOfWeek(new Date(), { weekStartsOn: 0 });
+    }
     return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "yyyy-MM-dd"));
 };
 
@@ -31,6 +37,8 @@ const ScheduleComponent = () => {
     const [to, setTo] = useState(format(addDays(startOfWeek(new Date(), { weekStartsOn: 0 }), 6), "yyyy-MM-dd"));
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [currentEdit, setCurrentEdit] = useState({ userId: "", date: "", clockIn: "", clockOut: "" });
+    const [currentWeek, setCurrentWeek] = useState(getCurrentWeek());
+    const [errorMessage, setErrorMessage] = useState('');
 
     const { data: schedules = [], isLoading, isError } = useQuery({
         queryKey: ['schedule', { from, to }],
@@ -53,6 +61,7 @@ const ScheduleComponent = () => {
     const downloadMutation = useMutation({
         mutationFn: downloadSchedule,
         onSuccess: (data) => {
+            setErrorMessage('');
             const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -62,12 +71,10 @@ const ScheduleComponent = () => {
             document.body.removeChild(link);
         },
         onError: (error) => {
+            setErrorMessage("No schedule found for the selected date range.");
             console.log(error);
         }
     });
-
-
-    const currentWeek = getCurrentWeek();
 
     const getScheduleForDay = (userId, date) => {
         const schedule = schedules.find(
@@ -123,24 +130,29 @@ const ScheduleComponent = () => {
         <div className="p-4">
             <div className='flex justify-between'>
                 <h1 className="text-2xl font-bold mb-6">Schedule</h1>
-                {/* <div>
+                <div>
                     <input
                         type="date"
                         value={from}
-                        onChange={(e) => setFrom(e.target.value)}
-                        className="border p-2 rounded-md"
+                        onChange={(e) => {
+                            setFrom(format(addDays(startOfWeek(new Date(e.target.value), { weekStartsOn: 0 }), 0), "yyyy-MM-dd"));
+                            setTo(format(addDays(startOfWeek(new Date(e.target.value), { weekStartsOn: 0 }), 6), "yyyy-MM-dd"));
+                            setCurrentWeek(getCurrentWeek(e.target.value));
+                        }}
+                        className="border p-2 rounded-md mr-5"
                     />
                     <input
                         type="date"
                         value={to}
-                        onChange={(e) => setTo(e.target.value)}
                         className="border p-2 rounded-md"
+                        disabled
                     />
-                </div> */}
+                </div>
                 <div>
                 <button className="bg-blue-900 text-white py-2 px-4 rounded shadow" onClick={downloadExcel} disabled={downloadMutation?.isPending}>
                     {downloadMutation?.isPending ? 'Downloading...' : 'Download Excel'}
                 </button>
+                {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
                 </div>
             </div>
 

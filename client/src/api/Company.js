@@ -9,8 +9,13 @@ export const getCompany = async (company_id) => {
     }
 }
 
-export const createCompany = async ({ name, address, email, phone, password, UEN, employeeCount, industry, website, message }) => {
+export const createCompany = async ({ name, address, email, phone, password, UEN, subscriptionPlan, industry, website, message }) => {
     try {
+
+        if(!name || !address || !email || !phone || !password || !UEN || !subscriptionPlan || !industry || !website || !message) {
+            throw new Error({error: 'Please provide all required fields'});
+        }
+
         const response = await axios.post('/company', {
             name,
             address,
@@ -18,7 +23,7 @@ export const createCompany = async ({ name, address, email, phone, password, UEN
             phone,
             password,
             UEN,
-            employeeCount,
+            subscriptionPlan,
             industry,
             website,
             message

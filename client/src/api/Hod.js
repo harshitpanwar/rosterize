@@ -45,6 +45,6 @@ export const downloadSchedule = async ({from, to}) => {
         });
         return response.data;
     } catch (error) {
-        return error.message;
+        throw new Error(error?.response?.data?.message || error.message || 'Failed to download schedule');
     }
 }

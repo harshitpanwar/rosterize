@@ -37,7 +37,12 @@ module.exports = {
             const { firstName, lastName, email, companyRole, department, phoneNo, role } = req.body;
             // console.log(req.body);
             if(!firstName || !email || !companyRole || !department) {
-                return res.status(400).send('All fields are required');
+                return res.status(400).send({error: 'All fields are required'});
+            }
+
+            const userExists = await User.findOne({ email });
+            if (userExists) {
+                return res.status(400).send({ error: 'User with this email already exists' });
             }
 
             const tempPassword = 'password';
@@ -59,12 +64,12 @@ module.exports = {
             const savedUser = await newUser.save();
     
             if (!savedUser) {
-                res.status(500).send('Error saving user')
+                res.status(500).send({error: 'Error saving user'})
             }
             res.send(savedUser);
     
         } catch (error) {
-            res.status(500).send(error.message || 'Error saving user')
+            res.status(500).send({error: error.message || 'Error saving user'})
             
         }
     },

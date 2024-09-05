@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getClockInFromToDate, getLeaves, handleDownload } from '../../api/User';
+import { format } from 'date-fns';
 import Loader from '../../Components/Loader/Loader';
 
 const Schedule = () => {
@@ -71,8 +72,8 @@ const Schedule = () => {
     const schedule = {};
     data.forEach(entry => {
       const date = new Date(entry.clockIn).getDate();
-      const clockInTime = new Date(entry.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const clockOutTime = new Date(entry.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const clockInTime = format(new Date(entry.clockIn), "HH:mm");
+      const clockOutTime = format(new Date(entry.clockOut), "HH:mm");
       schedule[date] = `${clockInTime} - ${clockOutTime}`;
     });
     return schedule;

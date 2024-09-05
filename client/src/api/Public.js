@@ -9,7 +9,7 @@ export const listPlansAndReviews = async () => {
     }
 }
 
-export const createCompany = async ({ name, address, email, phone, password, UEN, employeeCount, industry, website, message }) => {
+export const createCompany = async ({ name, address, email, phone, password, UEN, subscriptionPlan, industry, website, message }) => {
     try {
         const response = await axios.post('/public/company', {
             name,
@@ -18,7 +18,7 @@ export const createCompany = async ({ name, address, email, phone, password, UEN
             phone,
             password,
             UEN,
-            employeeCount,
+            subscriptionPlan,
             industry,
             website,
             message

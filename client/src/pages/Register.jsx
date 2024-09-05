@@ -1,13 +1,20 @@
 // src/pages/Register.jsx
 import { useNavigate } from 'react-router-dom';
 import companyLogo from '../assets/rosterize.png'
-import { createCompany } from '../api/Company';
-import { useMutation } from '@tanstack/react-query';
+// import { createCompany } from '../api/Company';
+import { listPlansAndReviews, createCompany } from '../api/Public';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import Loader from '../Components/Loader/Loader';
 
 export default function Register() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+
+  const { data, isLoading } = useQuery({
+    queryKey: 'plansAndReviews',
+    queryFn: () => listPlansAndReviews(),
+  })
 
   const mutation = useMutation({
     mutationFn: createCompany,
@@ -36,6 +43,8 @@ export default function Register() {
     mutation.mutate(data);
   };
 
+  if (isLoading) return <Loader />;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
@@ -53,18 +62,14 @@ export default function Register() {
           <select
             id="employees"
             className="input"
-            value
-            name="employeeCount"
+            name="subscriptionPlan"
             required
           >
-            <option value="1-10">1-10</option>
-            <option value="11-50">11-50</option>
-            <option value="51-200">51-200</option>
-            <option value="201-500">201-500</option>
-            <option value="501-1000">501-1000</option>
-            <option value="1001-5000">1001-5000</option>
-            <option value="5001-10000">5001-10000</option>
-            <option value="10001+">10001+</option>
+            {
+              data?.plans.map((plan, idx) => (
+                <option key={idx} value={plan._id}>{plan.range}</option>
+              ))
+            }
           </select>
 
           <input type="text" placeholder="Industry" className="input" name="industry" required/>

@@ -167,10 +167,20 @@ module.exports = {
     
             const workbook = new ExcelJS.Workbook();
             const sheetNames = [];
+
+            if (clockInOut.length === 0) {
+                return res.status(404).json({ message: 'No schedule found for the selected date range.' });
+            }
     
             for (const entry of clockInOut) {
                 const { user, clockIn, clockOut } = entry;
-                const sheetName = `${user.firstName}_${user.email}`;
+
+                // if the sheetName exceeds 31 characters, truncate it
+                let sheetName = `${user.email}`;
+                if (sheetName.length > 30) {
+                    sheetName = sheetName.substring(0, 30);
+                }
+
                 if (!sheetNames.includes(sheetName)) {
                     const worksheet = workbook.addWorksheet(sheetName);
                     worksheet.columns = [

@@ -21,10 +21,10 @@ module.exports = {
     postCompany: async(req, res) => {
 
         try {
-            const { name, address, email, phone, password, UEN, employeeCount, industry, website, message } = req.body;
+            const { name, address, email, phone, password, UEN, subscriptionPlan, industry, website, message } = req.body;
 
-            if(!name || !address || !email || !phone || !password || !UEN || !employeeCount || !industry || !website || !message) {
-                res.status(400).send('Please provide all required fields');
+            if(!name || !address || !email || !phone || !password || !UEN || !subscriptionPlan || !industry || !website || !message) {
+               return res.status(400).send('Please provide all required fields');
             }
     
             const hashedPassword = await bcrypt.hash(password, 10);
@@ -43,7 +43,8 @@ module.exports = {
                 address,
                 phone,
                 UEN,
-                employeeCount,
+                subscriptionPlan,
+                website,
                 industry,
                 message,
                 createdBy: savedUser._id,
@@ -118,7 +119,16 @@ module.exports = {
             }
             // in the created by field, search for the email id
 
-            const companies = await User.find(findCondition).populate('company');
+            // const companies = await User.find(findCondition).populate('company');
+            const companies = await User.find(findCondition)
+            .populate({
+                path: 'company',
+                populate: {
+                    path: 'subscriptionPlan',
+                    select: 'range'
+                }
+            });
+
 
             // const companies = await Company.find().populate('createdBy');
             res.send(companies);

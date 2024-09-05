@@ -231,8 +231,9 @@ const UserManagement = () => {
       <button
         onClick={handleAddUser}
         className="bg-blue-700 text-white p-2 rounded w-full lg:w-1/4"
+        disabled={createUserMutation.isPending}
       >
-        Add User
+        {createUserMutation.isPending ? "Adding User..." : "Add User"}
       </button>
         {message && <p className="text-green-500 mt-4">{message}</p>}
         {error && <p className="text-red-500 mt-4">{error}</p>}

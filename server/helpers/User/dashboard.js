@@ -59,7 +59,13 @@ module.exports = {
 
     },
     departmentHead: async function (departmentId, companyId) {
-    
+        
+        const date = new Date();
+
+        const lte = new Date(date.setHours(0, 0, 0, 0));
+        const gte = new Date(date.setHours(23, 59, 59, 999));
+
+
         const userCount = await User.find({ 
             company: companyId, 
             department: departmentId,
@@ -75,12 +81,52 @@ module.exports = {
         const medicalLeaveCount = await Leave.find({ company: companyId, department: departmentId, leaveType: 'medical', status: 'approved', startDate: { $lte: new Date() }, endDate: { $gte: new Date() } }).countDocuments();
 
         const annualLeaveCount = await Leave.find({ company: companyId, department: departmentId, leaveType: 'annual', status: 'approved', startDate: { $lte: new Date() }, endDate: { $gte: new Date() } }).countDocuments();
+        const users = await User.find({
+            company: companyId,
+            department : departmentId
+        });
+
+        const userIds = users.map(user => user._id);
+
+        const statusOnline = await Status.find({
+            user: { $in: userIds },
+            createdAt: { $gte: lte, $lte: gte },
+            status: 'online'
+        }).populate('user');
+
+        statusOnline.forEach(status => {
+            console.log('status', status.user.firstName, status.user.lastName, status.user._id);
+        })
+
+        const statusOffline = users.map(user => {
+            const isOnline = statusOnline.find(status => status.user._id.toString() === user._id.toString());
+            if(!isOnline) return user;
+        }).filter(Boolean);
+
+        // users who are on leave today
+
+        let leaveUsers = await Leave.find({
+            company: companyId,
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() }
+        }).populate('user');
+
+        // remove duplicates by user._id
+        leaveUsers = leaveUsers.filter((user, index, self) =>
+            index === self.findIndex((t) => (
+                t.user._id === user.user._id
+            ))
+        )
+
 
         return {
             userCount,
             leaveCount,
             medicalLeaveCount,
-            annualLeaveCount
+            annualLeaveCount,
+            leaveUsers,
+            statusOnline,
+            statusOffline
         }    
     },
     user: async function (userId, departmentId, companyId) {
@@ -106,10 +152,10 @@ module.exports = {
             }).populate('user');
 
             const statusOffline = users.map(user => {
-                const isOnline = statusOnline.find(status => status.user.toString() === user._id.toString());
+                const isOnline = statusOnline.find(status => status.user._id.toString() === user._id.toString());
                 if(!isOnline) return user;
-            })
-
+            }).filter(Boolean);
+    
             // users who are on leave today
 
             let leaveUsers = await Leave.find({
@@ -125,9 +171,19 @@ module.exports = {
                 ))
             )
 
-            // total number of hours clockedin 
+            // total number of hours clockedin current week
+                
+            const startOfWeek = new Date();
+            startOfWeek.setHours(0, 0, 0, 0);
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+            const endOfWeek = new Date();
+            endOfWeek.setHours(23, 59, 59, 999);
+            endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
+
             const clockedInDocuments = await ClockInOut.find({
-                user: userId
+                user: userId,
+                createdAt: { $gte: startOfWeek, $lte: endOfWeek }
             });
 
             let totalHoursWorked = 0;
