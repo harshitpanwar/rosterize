@@ -6,14 +6,22 @@ import Loader from '../Components/Loader/Loader';
 const utcToLocalTimeString = (utcTimeString) => {
   const utcDate = new Date(utcTimeString);
 
-  // Adjusting to local time
   const localHours = utcDate.getHours().toString().padStart(2, '0');
   const localMinutes = utcDate.getMinutes().toString().padStart(2, '0');
 
-  // Combine into "HH:mm" format
   const localTimeString = `${localHours}:${localMinutes}`;
   return localTimeString;
 };
+
+const extractTime = (isoDateStr) => {
+  const date = new Date(isoDateStr);
+  
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  
+  return `${hours}:${minutes}`;
+};
+
 
 const ClockInOut = () => {
   const [isClockedIn, setIsClockedIn] = useState(false);
@@ -30,11 +38,11 @@ const ClockInOut = () => {
     onSuccess: (data) => {
       if (data.clockIn && !data.clockOut) {
         setIsClockedIn(true);
-        setStartTime(utcToLocalTimeString(data.clockIn));
+        setStartTime(extractTime(data.clockIn));
       } else if (data.clockIn && data.clockOut) {
         setIsClockedIn(false);
-        setStartTime(utcToLocalTimeString(data.clockIn));
-        setEndTime(utcToLocalTimeString(data.clockOut));
+        setStartTime(extractTime(data.clockIn));
+        setEndTime(extractTime(data.clockOut));
       }
     },
     onError: (error) => {
@@ -87,11 +95,11 @@ const ClockInOut = () => {
     if (data) {
       if (data.clockIn && !data.clockOut) {
         setIsClockedIn(true);
-        setStartTime(utcToLocalTimeString(data.clockIn));
+        setStartTime(extractTime(data.clockIn));
       } else if (data.clockIn && data.clockOut) {
         setIsClockedIn(false);
-        setStartTime(utcToLocalTimeString(data.clockIn));
-        setEndTime(utcToLocalTimeString(data.clockOut));
+        setStartTime(extractTime(data.clockIn));
+        setEndTime(extractTime(data.clockOut));
       }
     }
   }, [data]);

@@ -4,6 +4,16 @@ import { getClockInFromToDate, getLeaves, handleDownload } from '../../api/User'
 import { format } from 'date-fns';
 import Loader from '../../Components/Loader/Loader';
 
+
+const extractTime = (isoDateStr) => {
+  const date = new Date(isoDateStr);
+  
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  
+  return `${hours}:${minutes}`;
+};
+
 const Schedule = () => {
   const monthToFromToDate = (month) => {
     const currentYear = new Date().getFullYear();
@@ -72,9 +82,7 @@ const Schedule = () => {
     const schedule = {};
     data.forEach(entry => {
       const date = new Date(entry.clockIn).getDate();
-      const clockInTime = format(new Date(entry.clockIn), "HH:mm");
-      const clockOutTime = format(new Date(entry.clockOut), "HH:mm");
-      schedule[date] = `${clockInTime} - ${clockOutTime}`;
+      schedule[date] = `${extractTime(entry.clockIn)} - ${extractTime(entry.clockOut)}`;
     });
     return schedule;
   };
