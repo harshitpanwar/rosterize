@@ -53,6 +53,7 @@ module.exports = {
                 lastName,
                 email,
                 password: hashedPassword,
+                balanceOfAnnualLeaves: 16,
                 role,
                 companyRole,
                 department,

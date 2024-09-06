@@ -44,9 +44,15 @@ module.exports = {
 
             // reduce the leave balance from the user account
 
-            if(status === 'approved') {
+            if(status === 'approved' && leave.leaveType === 'annual') {
                 const user = await User.findById(leave.user);
-                user.balanceOfAnnualLeaves -= leave.days;
+                const leaveBalance = user.balanceOfAnnualLeaves;
+                // number of days the user is on leave
+                const startDate = new Date(leave.startDate);
+                const endDate = new Date(leave.endDate);
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                user.balanceOfAnnualLeaves = leaveBalance - diffDays;
                 await user.save();
             }
 
