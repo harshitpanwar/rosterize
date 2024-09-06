@@ -32,7 +32,6 @@ export const getUser = async (id) => {
 export const updateUser = async ({id, user}) => {
     try {
 
-        console.log('user', user);
         const response = await axios.post(`/user/update/${id}`, user);
         return response.data;
     }

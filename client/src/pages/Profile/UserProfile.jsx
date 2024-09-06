@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import { getUser, updateUser } from '../../api/User';
 import Loader from '../../Components/Loader/Loader';
 import { useAuth } from '../../context/AuthContext';
 
 const UserProfile = () => {
+
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phoneNumber: '',
+    phoneNo: '',
     emergencyContactName: '',
-    emergencyContactNumber: '',
-    role: '',
+    emergencyContactNo: '',
     department: '',
+    role: '',
     employeeId: '',
   });
 
@@ -28,13 +31,36 @@ const UserProfile = () => {
     retry: 0,
   });
 
+  useEffect(() => {
+    if(data) {
+      setProfile({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNo: data.phoneNo,
+        emergencyContactName: data.emergencyContactName,
+        emergencyContactNo: data.emergencyContactNo,
+        department: data.department,
+        companyRole: data.companyRole,
+        employeeId: data.employeeId,
+      });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    console.log('profile', profile);
+  }, [profile]);
+
   const updateUserMutation = useMutation({
         mutationFn: updateUser,
         onSuccess: (data) => {
+            setErrorMessage('');
+            setSuccessMessage('User updated successfully');
             queryClient.invalidateQueries('userData');
         },
         onError: (error) => {
-        console.error('Update user failed:', error);
+            setSuccessMessage('');
+            setErrorMessage(error.message);
         }
     });
 
@@ -43,24 +69,19 @@ const UserProfile = () => {
   };
 
   const handleSaveChanges = () => {
-    // Add logic to save changes
 
-        const user = {
-            firstName: profile.firstName,
-            lastName: profile.lastName,
-            email: profile.email,
-            phoneNo: profile.phoneNumber,
-            emergencyContactName: profile.emergencyContactName,
-            emergencyContactNo: profile.emergencyContactNumber,
-            role: profile.role,
-            department: profile.department,
-            employeeId: profile.employeeId,
-        };
+    const user = {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        email: profile.email,
+        phoneNo: profile.phoneNo,
+        emergencyContactName: profile.emergencyContactName,
+        emergencyContactNo: profile.emergencyContactNo,
+    };
 
-    
+    setProfile(user);
 
-    updateUserMutation.mutate(authData._id, user);
-    console.log('Changes Saved:', user);
+    updateUserMutation.mutate({id: authData._id, user});
   };
 
   const handleCancel = () => {
@@ -69,17 +90,11 @@ const UserProfile = () => {
       firstName: '',
       lastName: '',
       email: '',
-      phoneNumber: '',
+      phoneNo: '',
       emergencyContactName: '',
-      emergencyContactNumber: '',
-      role: '',
-      department: '',
-      employeeId: '',
+      emergencyContactNo: '',
     });
   };
-
-
-  if(data) console.log(data);
 
   if(isLoading) return <Loader />;
 
@@ -95,7 +110,7 @@ const UserProfile = () => {
             <input
               type="text"
               name="firstName"
-              value={data.firstName}
+              value={profile.firstName}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
             />
@@ -107,7 +122,7 @@ const UserProfile = () => {
             <input
               type="text"
               name="lastName"
-              value={data.lastName}
+              value={profile.lastName}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
             />
@@ -119,19 +134,19 @@ const UserProfile = () => {
             <input
               type="email"
               name="email"
-              value={data.email}
+              value={profile.email}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold mb-2" htmlFor="phoneNumber">
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="phoneNo">
               Phone Number:
             </label>
             <input
               type="tel"
-              name="phoneNumber"
-              value={data.phoneNo}
+              name="phoneNo"
+              value={profile.phoneNo}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
             />
@@ -143,19 +158,19 @@ const UserProfile = () => {
             <input
               type="text"
               name="emergencyContactName"
-              value={data.emergencyContactName}
+              value={profile.emergencyContactName}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold mb-2" htmlFor="emergencyContactNumber">
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="emergencyContactNo">
               Emergency Contact Number:
             </label>
             <input
               type="tel"
-              name="emergencyContactNumber"
-              value={data.emergencyContactNo}
+              name="emergencyContactNo"
+              value={profile?.emergencyContactNo}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
             />
@@ -171,9 +186,10 @@ const UserProfile = () => {
             <input
               type="text"
               name="role"
-              value={data.companyRole.name}
+              value={profile?.companyRole?.name}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
+              disabled
             />
           </div>
           <div>
@@ -183,9 +199,10 @@ const UserProfile = () => {
             <input
               type="text"
               name="department"
-              value={data.department.name}
+              value={profile?.department?.name}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
+              disabled
             />
           </div>
           <div>
@@ -198,12 +215,24 @@ const UserProfile = () => {
               value={data.employeeId}
               onChange={handleChange}
               className="block w-full bg-white border border-gray-300 rounded-md p-2"
+              disabled
             />
           </div>
+
         </div>
-
-
       </div>
+        <div className="flex justify-evenly mt-5">
+            <button
+              onClick={handleSaveChanges}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+              disabled={updateUserMutation.isPending}
+            >
+              {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </button>
+        </div>
+          {successMessage && <p className="text-green-500 mt-4">{successMessage}</p>}
+          {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
+
     </div>
   );
 };

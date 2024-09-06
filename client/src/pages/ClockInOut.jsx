@@ -3,50 +3,45 @@ import { useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import { clockIn, clockOut, getClockInOutStatus } from '../api/User';
 import Loader from '../Components/Loader/Loader';
 
-const utcToTimeString = (utcTimeString) => {
-    const utcDate = new Date(utcTimeString);
+const utcToLocalTimeString = (utcTimeString) => {
+  const utcDate = new Date(utcTimeString);
 
-  // Extract the local hours and minutes
-  const hours = utcDate.getHours().toString().padStart(2, '0');
-  const minutes = utcDate.getMinutes().toString().padStart(2, '0');
+  // Adjusting to local time
+  const localHours = utcDate.getHours().toString().padStart(2, '0');
+  const localMinutes = utcDate.getMinutes().toString().padStart(2, '0');
 
   // Combine into "HH:mm" format
-  const originalTimeString = `${hours}:${minutes}`;
-  return originalTimeString;
-
-}
+  const localTimeString = `${localHours}:${localMinutes}`;
+  return localTimeString;
+};
 
 const ClockInOut = () => {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('18:00');
-  const [succesMessage, setSuccessMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const queryClient = new QueryClient();
 
-  const {loading, error, data} = useQuery({
+  const { isLoading, error, data } = useQuery({
     queryKey: ['clockInOutStatus'],
     queryFn: getClockInOutStatus,
     onSuccess: (data) => {
-      console.log(data);
-      if(data.clockIn && !data.clockOut) {
-        console.log("clockIn", data.clockIn);
+      if (data.clockIn && !data.clockOut) {
         setIsClockedIn(true);
-        setStartTime(utcToTimeString(data.clockIn));
-      }
-      else if(data.clockIn && data.clockOut) {
-        console.log("clockOut", data.clockIn);
+        setStartTime(utcToLocalTimeString(data.clockIn));
+      } else if (data.clockIn && data.clockOut) {
         setIsClockedIn(false);
-        setStartTime(utcToTimeString(data.clockIn));
-        setEndTime(utcToTimeString(data.clockOut));
+        setStartTime(utcToLocalTimeString(data.clockIn));
+        setEndTime(utcToLocalTimeString(data.clockOut));
       }
     },
     onError: (error) => {
       console.error(error);
-    }
-  })
-  
+    },
+  });
+
   const clockInMutation = useMutation({
     mutationFn: clockIn,
     onSuccess: () => {
@@ -58,7 +53,7 @@ const ClockInOut = () => {
       setSuccessMessage('');
       setErrorMessage(error.message);
       console.error(error);
-    }
+    },
   });
 
   const clockOutMutation = useMutation({
@@ -72,41 +67,36 @@ const ClockInOut = () => {
       setSuccessMessage('');
       setErrorMessage(error.message);
       console.error(error);
-    }
+    },
   });
-  
+
   const handleClockIn = () => {
-    clockInMutation.mutate({time: startTime});
+    clockInMutation.mutate({ time: startTime });
   };
 
   const handleClockOut = () => {
-
-    if(endTime < startTime) {
+    if (endTime < startTime) {
       setSuccessMessage('');
       return setErrorMessage('End time cannot be less than start time');
     }
-    clockOutMutation.mutate({time: endTime});
+    clockOutMutation.mutate({ time: endTime });
   };
 
   useEffect(() => {
-
     queryClient.invalidateQueries('clockInOutStatus');
-    if(data) {
-      if(data.clockIn && !data.clockOut) {
+    if (data) {
+      if (data.clockIn && !data.clockOut) {
         setIsClockedIn(true);
-        setStartTime(utcToTimeString(data.clockIn));
-      }
-      else if(data.clockIn && data.clockOut) {
+        setStartTime(utcToLocalTimeString(data.clockIn));
+      } else if (data.clockIn && data.clockOut) {
         setIsClockedIn(false);
-        setStartTime(utcToTimeString(data.clockIn));
-        setEndTime(utcToTimeString(data.clockOut));
+        setStartTime(utcToLocalTimeString(data.clockIn));
+        setEndTime(utcToLocalTimeString(data.clockOut));
       }
     }
+  }, [data]);
 
-  }, [data])
-
-  if(loading) return <Loader />
-  
+  if (isLoading) return <Loader />;
 
   return (
     <div className="p-6 flex flex-col items-center justify-center">
@@ -142,24 +132,24 @@ const ClockInOut = () => {
         </div>
 
         <div className="mt-6">
-          {!isClockedIn? (
+          {!isClockedIn ? (
             <button
               onClick={handleClockIn}
               className="w-full bg-blue-900 text-white py-2 px-4 rounded shadow"
             >
-              {clockInMutation.isPending ? 'Clocking In...' : 'Clock In'}
+              {clockInMutation.isLoading ? 'Clocking In...' : 'Clock In'}
             </button>
           ) : (
             <button
               onClick={handleClockOut}
               className="w-full bg-blue-900 text-white py-2 px-4 rounded shadow"
             >
-              {clockOutMutation.isPending ? 'Clocking Out...' : 'Clock Out'}
+              {clockOutMutation.isLoading ? 'Clocking Out...' : 'Clock Out'}
             </button>
           )}
         </div>
       </div>
-      {succesMessage && <div className="mt-4 text-green-500">{succesMessage}</div>}
+      {successMessage && <div className="mt-4 text-green-500">{successMessage}</div>}
       {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}
     </div>
   );

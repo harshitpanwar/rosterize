@@ -34,11 +34,22 @@ const UserDashboard = () => {
         <div className="p-4 bg-gray-100">
           <div className="text-lg font-semibold mb-2">Online</div>
           <div className="space-y-2">
+          <div className="relative inline-block">
             {
               data.statusOnline.map((status, index) => (
-                <button key={index} className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">{`${status?.user?.firstName} ${status?.user?.lastName}`}</button>
+                <div key={index} className="group relative inline-block">
+                  <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">
+                    {`${status?.user?.firstName} ${status?.user?.lastName}`}
+                  </button>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-black text-white text-sm rounded-md px-2 py-1">
+                    {status?.message}
+                  </div>
+                </div>
               ))
             }
+          </div>
+
             {/* <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">UserA</button>
             <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">UserB</button>
             <button className="px-4 py-2 m-2 bg-blue-500 text-white rounded-md">UserC</button>

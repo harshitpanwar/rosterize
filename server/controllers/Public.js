@@ -38,6 +38,7 @@ module.exports = {
                 email,
                 password: hashedPassword,
                 role: 'companyadmin',
+                balanceOfAnnualLeaves: 16,
                 status: 'active'
             });
 

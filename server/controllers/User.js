@@ -77,11 +77,12 @@ module.exports = {
         try {
 
             const user_id = req.params.user_id;
-            const { firstName, lastName, email, companyRole, department, phoneNo, role,
-                emergencyContactName, emergencyContactNo, employeeId
+            const { firstName, lastName, email, phoneNo,
+                emergencyContactName, emergencyContactNo, 
+                companyRole, department, employeeId
              } = req.body;
 
-            if(!firstName || !email || !companyRole || !department) {
+            if (!firstName || !lastName || !email || !phoneNo || !emergencyContactName || !emergencyContactNo) {
                 return res.status(400).send('All fields are required');
             }
 
@@ -93,14 +94,19 @@ module.exports = {
             user.firstName = firstName;
             user.lastName = lastName;
             user.email = email;
-            user.companyRole = companyRole;
-            user.department = department;
             user.phoneNo = phoneNo;
-            user.role = role;
             user.emergencyContactName = emergencyContactName;
             user.emergencyContactNo = emergencyContactNo;
-            user.employeeId = employeeId;
             user.updatedAt = new Date();
+            if(companyRole) {
+                user.companyRole = companyRole;
+            }
+            if(department) {
+                user.department = department;
+            }
+            if(employeeId) {
+                user.employeeId = employeeId;
+            }
 
             const updatedUser = await user.save();
             if (!updatedUser) {
